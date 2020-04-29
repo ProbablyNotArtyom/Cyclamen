@@ -1,0 +1,7 @@
+ {
+  "gccDefaultCFlags": "-Wall -fsyntax-only",
+  "gccDefaultCppFlags": "-Wall -std=c++11 -fsyntax-only",
+  "gccErrorLimit": 15,
+  "gccIncludePaths": ".,./include,./path",
+  "gccSuppressWarnings": true
+}
