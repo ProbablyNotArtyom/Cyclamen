@@ -77,7 +77,7 @@ deps: $(OBJECTS) $(OBJECTS_ASM)
 $(OBJECTS): $$(patsubst $$(BINDIR)%.o, $$(BASEDIR)%.c, $$@)
 	@echo "[CC] -c $(shell realpath -m --relative-to=$(PWD) $(patsubst $(BINDIR)%, $(BASEDIR)%, $(@:%.o=%.c))) -o $(shell realpath -m --relative-to=$(PWD) $(@:%.o=%.S))"
 	@mkdir -p $(dir $@)
-	@$(CC) $(CCFLAGS) -o $(@:%.o=%.S) $(patsubst $(BINDIR)%, $(BASEDIR)%, $(@:%.o=%.c))
+	@$(CC) $(CCFLAGS) -o $(BASEDIR)/$(notdir $(@:%.o=%.s)) $(patsubst $(BINDIR)%, $(BASEDIR)%, $(@:%.o=%.c))
 	@mv $(BASEDIR)/$(notdir $(@:%.o=%.s)) $(dir $@)$(notdir $(@:%.o=%.S))
 	@$(AS) $(ASFLAGS) -o $@ $(@:%.o=%.S)
 
@@ -88,7 +88,7 @@ $(OBJECTS_ASM): $$(patsubst $$(BINDIR)%.o, $$(BASEDIR)%.S, $$@)
 
 $(BINARY_NAME): $(OBJECTS) $(OBJECTS_ASM)
 	@echo "[LD] Creating final binary"
-	@$(LD) $(LDFLAGS) -o $@.bin $(shell find $(BINDIR) -name '*.o')
+	@$(LD) -o $@.bin $(shell find $(BINDIR) -name '*.o') $(LDFLAGS)
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Generic static targets

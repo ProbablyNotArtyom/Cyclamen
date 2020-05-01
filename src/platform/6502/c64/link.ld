@@ -4,7 +4,7 @@ SYMBOLS {
 }
 MEMORY {
     ZP:       file = "", define = yes, start = $0002, size = $00FE;
-	RAM: 	  file = "", define = yes, start = $0300, size = $0500;
+	RAM: 	  file = "", define = yes, start = $0800, size = $1000;
 	STACK:	  file = "", define = yes, start = __STACK__, size = __STACKSIZE__;
 	MAIN:     file = %O, define = yes, start = $E000, size = $2000, fill = yes;
 }

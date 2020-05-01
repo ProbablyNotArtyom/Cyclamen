@@ -30,4 +30,6 @@ typedef unsigned			size_t;
 #define INT64_WIDTH 64
 #define UINT64_WIDTH 64
 
+#define NULL 	0
+
 #endif

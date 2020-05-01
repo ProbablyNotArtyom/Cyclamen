@@ -4,6 +4,6 @@
 	#include <std.h>
 
 int putc(char chr);
-int puts(char *str);
+int puts(const char *str);
 
 #endif

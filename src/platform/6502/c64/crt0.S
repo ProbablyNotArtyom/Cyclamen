@@ -38,7 +38,7 @@ _platform_init:
 	sta $D012
 	lda #$08
 	sta $D016			; Setup our the VIC banks
-	lda #%00010111
+	lda #%00010110
 	sta $D018
 
 	lda #COLOR_LIGHTBLUE

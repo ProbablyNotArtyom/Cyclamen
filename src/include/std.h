@@ -12,5 +12,7 @@
 
 int putc(char chr);
 int puts(const char *str);
+char getc(void);
+char *gets(char *buff, int len);
 
 #endif
