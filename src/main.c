@@ -5,6 +5,6 @@
 extern int gmon(void);
 
 int main(int argc, char **argv) {
-	gmon();
+	while (true) gmon();
 	return 0;
 }

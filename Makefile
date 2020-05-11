@@ -12,6 +12,19 @@
 
 # Read in the build system config file
 export
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Define directories to use
+
+BASEDIR := $(PWD)
+BINDIR := $(BASEDIR)/bin
+SRCDIR := $(BASEDIR)/src
+OBJDIR := $(BASEDIR)/obj
+INCDIR := $(BASEDIR)/include
+TOOLDIR := $(BASEDIR)/tools
+
+BINARY_NAME := $(BINDIR)/cyclamen
+
 ifneq ("$(wildcard $(PWD)/.config)","")
 include $(PWD)/.config
 endif
@@ -26,17 +39,6 @@ ifndef PLATFORM
 $(error "[!] PLATFORM is not set. Either pass it as an environment variable or use the config script.")
 endif
 endif
-
-#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Define directories to use
-
-BASEDIR := $(PWD)
-BINDIR := $(BASEDIR)/bin
-SRCDIR := $(BASEDIR)/src
-OBJDIR := $(BASEDIR)/obj
-INCDIR := $(BASEDIR)/include
-
-BINARY_NAME := $(BINDIR)/cyclamen
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Append the default flags to the ones supplied by the target
@@ -88,7 +90,7 @@ $(OBJECTS_ASM): $$(patsubst $$(BINDIR)%.o, $$(BASEDIR)%.S, $$@)
 
 $(BINARY_NAME): $(OBJECTS) $(OBJECTS_ASM)
 	@echo "[LD] Creating final binary"
-	@$(LD) -o $@.bin $(shell find $(BINDIR) -name '*.o') $(LDFLAGS)
+	@$(LD) -o $@ $(shell find $(BINDIR) -name '*.o') $(LDFLAGS)
 
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Generic static targets

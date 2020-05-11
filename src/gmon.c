@@ -19,23 +19,23 @@
 
 bool gsh_do_cmd(uint8_t num);
 
-enum errList gsh_help(void);
-enum errList gsh_exit(void);
-enum errList gsh_echo(void);
-enum errList gsh_execute(void);
-enum errList gsh_deposit(void);
-enum errList gsh_view(void);
+const enum errList gsh_help(void);
+const enum errList gsh_exit(void);
+const enum errList gsh_echo(void);
+const enum errList gsh_execute(void);
+const enum errList gsh_deposit(void);
+const enum errList gsh_view(void);
 
-enum errList read_range(char *ptr, char *end);
+const enum errList read_range(char *ptr, char *end);
 
 //-----------------------------------Tables------------------------------------
 
-enum errList (* funcTable[])(void) = {
-	gsh_help,
-	gsh_exit,
-	gsh_execute,
-	gsh_deposit,
-	gsh_view,
+const enum errList (* funcTable[])(void) = {
+	&gsh_help,
+	&gsh_exit,
+	&gsh_execute,
+	&gsh_deposit,
+	&gsh_view,
 	NULL
 };
 
@@ -152,13 +152,13 @@ bool gsh_do_cmd(uint8_t num){
 //----------------------------------Builtins-----------------------------------
 
 /* Exits the monitor */
-enum errList gsh_exit(void) {
+const enum errList gsh_exit(void) {
 	doExit = true;
 	return errNONE;
 }
 
 /* Starts executing code from a place in memory */
-enum errList gsh_execute(void) {
+const enum errList gsh_execute(void) {
 	void (*ptr)(void) = (void*)current_addr;
 	if (!isEOI() && isAddr()) ptr = (void*)strToHEX();
 
@@ -166,7 +166,7 @@ enum errList gsh_execute(void) {
 	return errNONE;		// Return error free, assuming that whatever we call actually returns (good chance it wont)
 }
 
-enum errList gsh_help(void) {
+const enum errList gsh_help(void) {
 	int i;
 	for (i = 0; helpText[i] != NULL; i++) {
 		puts(helpText[i]);
@@ -176,7 +176,7 @@ enum errList gsh_help(void) {
 }
 
 /* Writes bytes to memory */
-enum errList gsh_deposit(void) {
+const enum errList gsh_deposit(void) {
 	uint8_t *end, *ptr = (uint8_t*)current_addr;	// Create pointers for the start and end of the section
 	uint8_t val;
 
@@ -194,7 +194,7 @@ enum errList gsh_deposit(void) {
 	return errNONE;
 }
 
-enum errList read_range(char *ptr,char *end) {
+const enum errList read_range(char *ptr,char *end) {
 	if (end != NULL){									// If we hit a range identifier...
 		uint8_t column;									// Create something to track how many columns have been printed so far
 		char *addrBuff;
@@ -224,7 +224,7 @@ enum errList read_range(char *ptr,char *end) {
 }
 
 /* Handles viewing of memory */
-enum errList gsh_view(void) {
+const enum errList gsh_view(void) {
 	char *ptr, *end;									// Create start and end pointers
 	if (!isEOI()){
 		while(*parse != '\0'){
