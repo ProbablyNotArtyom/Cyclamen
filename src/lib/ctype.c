@@ -1,3 +1,6 @@
+//---------------------------------------------------
+// Cyclamen - NotArtyom - 2020
+//---------------------------------------------------
 
 	#include <std.h>
 	#include <ctype.h>
@@ -5,40 +8,36 @@
 
 //---------------------------------------------------
 
-int isSpace(int val){
+int isSpace(int val) {
 	return ((char)val == ' ') ||
 		((char)val == '\n') ||
 		((char)val == '\r') ||
 		((char)val == '\t');
 }
 
-int isLower(int val){
+int isLower(int val) {
 	return ((char)val <= 'z' && (char)val >= 'a');
 }
 
-int isUpper(int val){
+int isUpper(int val) {
 	return ((char)val <= 'Z' && (char)val >= 'A');
 }
 
-int isAlpha(int val){
+int isAlpha(int val) {
 	return (isUpper(val) || isLower(val));
 }
 
-int isDigit(int val){
+int isDigit(int val) {
 	return ((char)val <= '9' && (char)val >= '0');
 }
 
-int toUpper(int val){
-	if ((val >= 'a') && (val <= 'z')){
-		return (val - 0x20);
-	}
+int toUpper(int val) {
+	if ((val >= 'a') && (val <= 'z')) return (val - 0x20);
 	return val;
 }
 
-int toLower(int val){
-	if ((val >= 'A') && (val <= 'Z')){
-		return (val + 0x20);
-	}
+int toLower(int val) {
+	if ((val >= 'A') && (val <= 'Z')) return (val + 0x20);
 	return val;
 }
 

@@ -46,18 +46,18 @@ _platform_init:
 	lda #COLOR_BLUE
 	sta $d021
 
-	ldx #$FF			; Clear the screen
-	lda #' '
-loop:
-	inx
-	sta $400,x
-	sta $500,x
-	sta $600,x
-	sta $700,x
-	cpx #$FF
-	bne loop
+; 	ldx #$FF			; Clear the screen
+; 	lda #' '
+; loop:
+; 	inx
+; 	sta $400,x
+; 	sta $500,x
+; 	sta $600,x
+; 	sta $700,x
+; 	cpx #$FF
+; 	bne loop
 
-	ldx #$FF			; Clear the screen
+	ldx #$FF			; Colour the screen
 	lda #COLOR_LIGHTBLUE
 cram:
 	inx

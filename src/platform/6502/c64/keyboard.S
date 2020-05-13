@@ -1,4 +1,6 @@
 
+.end
+
 .define PORTB $DC00				; VIA A
 .define PORTA $DC01
 .define DDRB  $DC02
@@ -180,7 +182,7 @@ KB1:    	eor #$FF 			; A has the Column number (Linear)
 
 :			jmp LE
 
-:			ldx #$FF
+			ldx #$FF
 			rts
 
 								; X has the Row number	(Binary)
@@ -240,7 +242,7 @@ SKB1:    	eor #$FF 			; A has the Column number (Linear)
 
 :			jmp LE
 
-:			ldx #$FF
+			ldx #$FF
 			rts
 
 KDN:

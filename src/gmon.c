@@ -1,9 +1,5 @@
 //---------------------------------------------------
-//
-//	Cyclamen v0.0
-//	NotArtyom
-//	04/28/20
-//
+// Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
 
 	#include <stdbool.h>
@@ -17,100 +13,115 @@
 
 //-----------------------------------------------------------------------------
 
-bool gsh_do_cmd(uint8_t num);
+static bool gsh_do_cmd(uint8_t num);
 
+const enum errList gsh_version(void);
 const enum errList gsh_help(void);
 const enum errList gsh_exit(void);
 const enum errList gsh_echo(void);
 const enum errList gsh_execute(void);
 const enum errList gsh_deposit(void);
 const enum errList gsh_view(void);
-
-const enum errList read_range(char *ptr, char *end);
+const enum errList gsh_copy(void);
+const enum errList gsh_move(void);
+const enum errList gsh_fill(void);
 
 //-----------------------------------Tables------------------------------------
 
+const char hexTable[] = "0123456789abcdef";
+
 const enum errList (* funcTable[])(void) = {
+	&gsh_version,
 	&gsh_help,
 	&gsh_exit,
 	&gsh_execute,
 	&gsh_deposit,
 	&gsh_view,
+	&gsh_echo,
+	&gsh_copy,
+	&gsh_move,
+	&gsh_fill,
 	NULL
 };
 
 const char funcKeys[] = {
-	'W',
-	'Q',
-	'G',
+	'v',
+	'h',
+	'q',
+	'g',
 	':',
-	'R',
+	'r',
+	'p',
+	'z',
+	'm',
+	'x',
 	0
+};
+
+const char *helpText[] = {
+	"-=-= commands -=-=-=-=-=-=-=-=-\n",
+	"r <$/%>     dump memory\n",
+	": (#)       deposit bytes\n",
+	"g <$>       jump to asm\n",
+	"p ...       print string\n",
+	"v           display version\n",
+	"h           print help\n",
+	"z <%>, ($)  copy range to addr\n",
+	"m <%>, ($)  move range to addr\n",
+	"x <%>, ($)  fill range with byte\n",
+	"\n\0"
 };
 
 const char* const errors[] = {
 	"",
-	"SYNTAX ERROR",
-	"UNDEFINED FUNCTION",
-	"UNEXPECTED ARGUMENTS",
-	"UNEXPECTED END OF INPUT",
-	"INVALID HEX",
-	"INVALID RANGE",
-	"BREAK"
-};
-
-const char hexTable[] = "0123456789ABCDEF";
-const char *helpText[] = {
-	"G'MON VERSION " GMON_VERSION,
-	"-=-=- COMMANDS -=-=-=-=-=-",
-	"R (<$|%>) DUMP MEMORY",
-	": (#)     DEPOSIT BYTES",
-	"G <$|%>   JUMP TO ASM",
-	"^ ...     PRINT FORMATTED",
-	"?         PRINT HELP",
-	"\0"
+	"(?) bad syntax\n",
+	"(?) invalid function\n",
+	"(!) unexpected args\n",
+	"(?) expected args\n",
+	"(?) invalid hex\n",
+	"(?) invalid range\n",
+	"(!) break\n"
 };
 
 //-----------------------------------------------------------------------------
 
-bool doExit;
 char *parse;
 char *current_addr;
 char *end_addr;
 char *cmdStart;
-char *tmp;
 
-uint8_t numCMDs;
-uint32_t numLoops;
-char inBuffer[BUFFLEN];					// Our input buffer
+static bool doExit;
+static char *tmp;
+static uint8_t numCMDs;
+static uint16_t numLoops;
+static char inBuffer[BUFFLEN];						// Our input buffer
 
 int gmon(void) {
-	puts("G'MON VERSION " GMON_VERSION "\n");
 	doExit = false;
 	current_addr = 0x00;
 	end_addr = 0x00;
-	while (doExit == false){
+	puts("g'mon version " GMON_VERSION "\r");
+	while (!doExit) {
 		print_prompt();
 		parse = inBuffer;							// Set the parse pointer to the beginning of the buffer
 		gets(inBuffer, BUFFLEN);					// Get user input
 		skipBlank();								// Skip and leading spaces
-		if (!isEOI()){
-			puts("");
+		putc('\r');
+		if (!noArgs()) {
 			numLoops = 1;
 			numCMDs = 0x01;
 			skipBlank();
 			cmdStart = parse;
-			if (*cmdStart == '{'){
-				while (*cmdStart != '}') cmdStart++;
+			if (*cmdStart == '/') {
+				while (*cmdStart != '/') cmdStart++;
 				numLoops = strtoul(parse+1, NULL, 10);
-				cmdStart++;
+				cmdStart += 2;
 			}
 			parse = cmdStart;
 			for (tmp = parse; *tmp != '\0'; tmp++) if (*tmp == ';') numCMDs += 1;
-			while (numLoops > 0){
+			while (numLoops > 0) {
 				gsh_do_cmd(numCMDs);
-				// Break if escape is pressed
-				if (getc() == 0x09) {
+                if (isBreak()) {
 					throw(errBREAK);
 					numLoops = 0;
 				} else {
@@ -118,28 +129,28 @@ int gmon(void) {
 					parse = cmdStart;
 				}
 			}
-		} else puts("\n");
+		} else throw(errUNDEF);
 	}
-
-	return 0;
+	return true;
 }
 
-bool gsh_do_cmd(uint8_t num){
-	uint8_t i;
+static bool gsh_do_cmd(uint8_t num) {
+	uint8_t i, stat;
 	char *tmp;
 	for (tmp = parse; *tmp != '\0'; tmp++)
 		if (*tmp == ';') *tmp = '\0';
 
-	while(num > 0){
+	while(num > 0) {
 		skipBlank();
-		for (i = 0; funcCmp(*parse, funcKeys[i]) == false && i < NUM_FUNCS-1; i++);	// Identify what function it is
+		for (i = 0; !(*parse == funcKeys[i]) && i < NUM_FUNCS-1; i++);	// Identify what function it is
 		if (i == NUM_FUNCS-1) {
-			if (setCurrents() == false){
-				throw(errUNDEF);			// If none matches, complain
+			stat = setCurrents();
+			if (stat != errNONE) {
+				throw(stat);				// If none matches, complain
 				return false;
 			}
 		} else {
-			skipToken();							// Skip over the function name itself
+			skipToken();					// Skip over the function name itself
 			if (throw((*funcTable[i])()) != errNONE) return false;
 		}
 		while (*parse != '\0') parse++;
@@ -153,94 +164,143 @@ bool gsh_do_cmd(uint8_t num){
 
 /* Exits the monitor */
 const enum errList gsh_exit(void) {
+	if (!noArgs()) return errEXTRA_ARGS;
 	doExit = true;
+	return errNONE;
+}
+
+const enum errList gsh_version(void) {
+	if (!noArgs()) return errEXTRA_ARGS;
+	puts("g'mon version " GMON_VERSION "\r");
+	return errNONE;
+}
+
+const enum errList gsh_help(void) {
+	int i;
+	if (!noArgs()) return errEXTRA_ARGS;
+	for (i = 0; helpText[i] != NULL; i++) puts(helpText[i]);
+	return errNONE;
+}
+
+const enum errList gsh_echo(void) {
+	if (noArgs()) return errNEEDS_ARGS;
+
+	puts(parse);
+	putc('\n');
 	return errNONE;
 }
 
 /* Starts executing code from a place in memory */
 const enum errList gsh_execute(void) {
 	void (*ptr)(void) = (void*)current_addr;
-	if (!isEOI() && isAddr()) ptr = (void*)strToHEX();
+	if (!noArgs() && isAddr()) ptr = (void*)strToHEX();
 
 	(*ptr)();			// Call that function
 	return errNONE;		// Return error free, assuming that whatever we call actually returns (good chance it wont)
 }
 
-const enum errList gsh_help(void) {
-	int i;
-	for (i = 0; helpText[i] != NULL; i++) {
-		puts(helpText[i]);
-		if (i % 2) while ((getc()) != '\r');	// Require a keypress to print another 2 lines
-	}
-	return errNONE;
-}
-
 /* Writes bytes to memory */
 const enum errList gsh_deposit(void) {
-	uint8_t *end, *ptr = (uint8_t*)current_addr;	// Create pointers for the start and end of the section
-	uint8_t val;
+	uint8_t val, *ptr = (uint8_t*)current_addr;			// Create pointers for the start and end of the section
 
-	skipBlank();
-	if (isCurrentVar){
-		ptr = (uint8_t*)strToHEX();
-	} else {
-		if (*skipBlank() == '\0') return errNOARGS;
-		while (!isEOI()) {
-			val = (uint8_t)strToHEX();
-			*(uint8_t*)(ptr++) = (uint8_t)val;
-			skipHex();
-		}
+	if (noArgs()) return errNEEDS_ARGS;
+	while (!noArgs()) {
+		val = (uint8_t)strToHEX();
+		*(uint8_t*)(ptr++) = (uint8_t)val;
+		skipHex();
 	}
-	return errNONE;
-}
 
-const enum errList read_range(char *ptr,char *end) {
-	if (end != NULL){									// If we hit a range identifier...
-		uint8_t column;									// Create something to track how many columns have been printed so far
-		char *addrBuff;
-		column = 0;
-		while (ptr <= end){								// Continue until we've reached the end of the range
-			int i;
-			if (ptr <= end){
-				putc('\n');								// Then set up a new line
-				column = 0;								// And print out the location header
-				printLong((uint32_t)ptr);
-				puts(" | ");
-			}
-			while (column < 4 && ptr <= end){
-				printByte(*ptr++);						// Print data byte at this address
-				putc(' ');
-				column++;								// Increase our column number
-				queryBreak();
-			}
-		}
-	} else {
-		putc('\n');									// Then set up a new line
-		printLong((uint32_t)ptr);
-		puts(" | ");
-		printByte(*ptr);
-	}
 	return errNONE;
 }
 
 /* Handles viewing of memory */
 const enum errList gsh_view(void) {
 	char *ptr, *end;									// Create start and end pointers
-	if (!isEOI()){
-		while(*parse != '\0'){
-			skipBlank();
-			if (isVar()){
-				read_range((char*)getMonVar(*parse), (char*)0x00000000);
-				parse++;
-			} else {
-				if (!getRange(&ptr, &end)) return errSYNTAX;
-				read_range(ptr, end);
-			}
+	uint8_t stat;
+
+	if (!noArgs()) {
+		while(*parse != '\0') {
+			stat = getRange(&ptr, &end);
+			if (stat != errNONE) return stat;
+			stat = dump_range(ptr, end);
 		}
 	} else {
-		if (isCurrentVar) read_range(current_addr, end_addr);
-		else read_range(current_addr, end_addr);
+		stat = dump_range(current_addr, end_addr);
 	}
-	puts("");
-	return errNONE;										// Return error free
+
+	return stat;
+}
+
+/* Copies a memory range to other memory */
+const enum errList gsh_copy(void) {
+	char *ptr, *end, *dest;								// Create pointers for start, end, and destination of block
+	uint8_t stat;
+
+	if (isRange()) {
+		stat = getRange(&ptr, &end);
+		if (stat != errNONE) return stat;
+	} else {
+		ptr = current_addr;
+		end = end_addr;
+	}
+
+	getArg(dest);
+	if (dest <= ptr) {									// If the destination is below the source in memory,
+		while (ptr <= end)
+			*(uint8_t*)(dest--) = *ptr--;
+	} else {
+		dest += end - ptr;								// If the destination is above the start of the source,
+		while (end >= ptr)
+			*(uint8_t*)(dest--) = *end--;
+	}													// This is done to avoid overwriting the source before we can copy it
+
+	return errNONE;
+}
+
+/* Copies a memory range to other memory, zeroing the source */
+const enum errList gsh_move(void) {
+	uint8_t *ptr, *end, *dest;							// Create pointers for start, end, and destination of block
+	uint8_t stat;
+
+	if (isRange()) {
+		stat = getRange(&ptr, &end);
+		if (stat != errNONE) return stat;
+	} else {
+		ptr = current_addr;
+		end = end_addr;
+	}
+
+	getArg(dest);
+	if (dest <= ptr) {									// If the destination is below the source in memory,
+		while (ptr <= end) {
+			*(uint8_t*)(dest++) = *ptr;					// Copy it starting at the beginning
+			*(uint8_t*)(ptr++) = NULL;
+		}
+	} else {
+		dest += end - ptr;								// If the destination is above the start of the source,
+		while (end >= ptr) {
+			*(uint8_t*)(dest++) = *end;
+			*(uint8_t*)(end++) = NULL;
+		}
+	}													// This is done to avoid overwriting the source before we can copy it
+
+	return errNONE;
+}
+
+/* Fills a memory range with a byte value */
+const enum errList gsh_fill(void) {
+	uint8_t *ptr, *end, val;
+	uint8_t stat;
+
+	if (isRange()) {
+		stat = getRange(&ptr, &end);
+		if (stat != errNONE) return stat;
+	} else {
+		ptr = current_addr;
+		end = end_addr;
+	}
+
+	getArg(val);
+	while (ptr <= end) *(uint8_t*)(ptr++) = val;		// Set every byte from *ptr to *end to the pattern in val
+	return errNONE;
 }

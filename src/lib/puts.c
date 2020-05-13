@@ -1,3 +1,6 @@
+//---------------------------------------------------
+// Cyclamen - NotArtyom - 2020
+//---------------------------------------------------
 
 	#include <std.h>
 	#include <hwdeps.h>
@@ -5,8 +8,9 @@
 
 //---------------------------------------------------
 
+int iter;
 int puts(const char *str) {
-	int i = 0;
-	while (str[i] != '\0') putc(str[i++]);
+	iter = 0;
+	while (str[iter] != '\0') putc(str[iter++]);
 	return 0;
 }
