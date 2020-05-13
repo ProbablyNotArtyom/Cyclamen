@@ -40,34 +40,34 @@ const enum errList (* funcTable[])(void) = {
 };
 
 const char funcKeys[] = {
-	'w',
-	'q',
-	'g',
+	'W',
+	'Q',
+	'G',
 	':',
-	'r',
+	'R',
 	0
 };
 
 const char* const errors[] = {
 	"",
-	"Syntax error",
-	"Undefined function",
-	"Unexpected arguments",
-	"Unexpected end of input",
-	"Invalid hex",
-	"Invalid range",
-	"Break"
+	"SYNTAX ERROR",
+	"UNDEFINED FUNCTION",
+	"UNEXPECTED ARGUMENTS",
+	"UNEXPECTED END OF INPUT",
+	"INVALID HEX",
+	"INVALID RANGE",
+	"BREAK"
 };
 
 const char hexTable[] = "0123456789ABCDEF";
 const char *helpText[] = {
-	"g'mon version " GMON_VERSION,
-	"-=-=- commands -=-=-=-=-=-",
-	"r (<$|%>) dump memory",
-	": (#)     deposit bytes",
-	"g <$|%>   jump to asm",
-	"^ ...     print formatted",
-	"?         print help",
+	"G'MON VERSION " GMON_VERSION,
+	"-=-=- COMMANDS -=-=-=-=-=-",
+	"R (<$|%>) DUMP MEMORY",
+	": (#)     DEPOSIT BYTES",
+	"G <$|%>   JUMP TO ASM",
+	"^ ...     PRINT FORMATTED",
+	"?         PRINT HELP",
 	"\0"
 };
 
@@ -85,7 +85,7 @@ uint32_t numLoops;
 char inBuffer[BUFFLEN];					// Our input buffer
 
 int gmon(void) {
-	puts("g'mon version " GMON_VERSION "\n");
+	puts("G'MON VERSION " GMON_VERSION "\n");
 	doExit = false;
 	current_addr = 0x00;
 	end_addr = 0x00;
