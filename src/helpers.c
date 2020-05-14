@@ -2,6 +2,7 @@
 // Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
 
+	#include <hwdeps.h>
 	#include <stdbool.h>
 	#include <stdint.h>
 	#include <stdio.h>
@@ -30,7 +31,7 @@ void print_prompt(void) {
 	puts(")\n $ ");
 }
 
-enum errList dump_range(char *ptr, char *end) {
+err_t dump_range(char *ptr, char *end) {
 	if (end != NULL) {									// If we hit a range identifier...
 		uint8_t column;									// Create something to track how many columns have been printed so far
 		while (ptr <= end) {							// Continue until we've reached the end of the range
@@ -68,7 +69,7 @@ bool isRange(void) {
 	return true;
 }
 
-enum errList setCurrents(void) {
+err_t setCurrents(void) {
 	skipBlank();
 	return getRange(&current_addr, &end_addr);
 }
@@ -102,7 +103,7 @@ ADDRSIZE strToHEX() {
 	return val;
 }
 
-enum errList throw(uint8_t index) {
+err_t throw(uint8_t index) {
 	if (index == errNONE) return errNONE;
 	else if (index == errDO_EXIT) return errDO_EXIT;
 	if (index == errBREAK) putc('\n');					// Force a newline if we're throwing BREAK
@@ -110,9 +111,9 @@ enum errList throw(uint8_t index) {
 	return errNONE;
 }
 
-enum errList getRange(char **lower, char **upper) {
+err_t getRange(char **lower, char **upper) {
 	if (isAddr()) {
-		*lower = (void *)strToHEX();
+		*lower = (char *)strToHEX();
 		while (isHex(*parse)) parse++;
 	} else if (*parse == '.' || *parse == ',') {
 		*lower = current_addr;
@@ -120,17 +121,15 @@ enum errList getRange(char **lower, char **upper) {
 		return errUNDEF;
 	}
 
-
-
 	if (*parse == '.' || *parse == ',') {
 		char tmp = *parse;
 		parse++;
 		if (noArgs()) return errBAD_RANGE;
 		if (!isAddr()) return errBAD_HEX;
 		if (tmp == '.')
-			*upper = (void *)strToHEX();
+			*upper = (char *)strToHEX();
 		else
-			*upper = (void *)(strToHEX() + *lower);
+			*upper = (char *)(strToHEX() + *lower);
 	} else {
 		skipToken();
 		*upper = NULL;

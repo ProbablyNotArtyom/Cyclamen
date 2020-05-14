@@ -2,6 +2,7 @@ _exit					export
 RESET_VEC				export
 
 INITGL					import
+_main                   import
 _platform_init			import
 program_start			import
 
@@ -54,7 +55,7 @@ RESET_VEC:
 	lbsr INITGL				; Initialize global variables
     lbsr constructors		; Attempt to initialize constructors
 
-    jsr program_start		; Jump to main
+    jsr _main		; Jump to main
 	
 _exit:
 	jmp _exit				; Main returned for some reason, so just loop in place

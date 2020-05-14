@@ -9,11 +9,6 @@
 
 #ifdef DEV_DUMMY
 #define DEV_DUMMY
-	
-    extern int dev_dummy_putc(char chr);
-    extern char dev_dummy_getc(void);
-    extern char dev_dummy_peek(void);
-    extern char dev_dummy_init(void);
 
 //---------------------------------------------------
 
@@ -31,7 +26,7 @@ char dev_dummy_peek(void) {
 }
 
 char dev_dummy_init(void) {
-    return (char)NULL;
+    return (char)true;
 }
 
 #endif

@@ -2,6 +2,7 @@
 // Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
 
+	#include <hwdeps.h>
 	#include <stdbool.h>
 	#include <stdint.h>
 	#include <stdio.h>
@@ -15,22 +16,22 @@
 
 static bool gsh_do_cmd(uint8_t num);
 
-enum errList gsh_version(void);
-enum errList gsh_help(void);
-enum errList gsh_exit(void);
-enum errList gsh_echo(void);
-enum errList gsh_execute(void);
-enum errList gsh_deposit(void);
-enum errList gsh_view(void);
-enum errList gsh_copy(void);
-enum errList gsh_move(void);
-enum errList gsh_fill(void);
+err_t gsh_version(void);
+err_t gsh_help(void);
+err_t gsh_exit(void);
+err_t gsh_echo(void);
+err_t gsh_execute(void);
+err_t gsh_deposit(void);
+err_t gsh_view(void);
+err_t gsh_copy(void);
+err_t gsh_move(void);
+err_t gsh_fill(void);
 
 //-----------------------------------Tables------------------------------------
 
 const char const hexTable[] = "0123456789abcdef";
 
-enum errList (* funcTable[])(void) = {
+uint8_t (* funcTable[])(void) = {
 	&gsh_version,
 	&gsh_help,
 	&gsh_exit,
@@ -166,26 +167,26 @@ static bool gsh_do_cmd(uint8_t num) {
 //----------------------------------Builtins-----------------------------------
 
 /* Exits the monitor */
-enum errList gsh_exit(void) {
+err_t gsh_exit(void) {
 	enforceArgc0();
 	doExit = true;
 	return errNONE;
 }
 
-enum errList gsh_version(void) {
+err_t gsh_version(void) {
 	enforceArgc0();
 	puts("g'mon version " GMON_VERSION "\r");
 	return errNONE;
 }
 
-enum errList gsh_help(void) {
+err_t gsh_help(void) {
 	uint8_t i = 0;
 	enforceArgc0();
 	while (helpText[i] != NULL) puts(helpText[i++]);
 	return errNONE;
 }
 
-enum errList gsh_echo(void) {
+err_t gsh_echo(void) {
 	requireArg0();
 
 	puts(parse);
@@ -194,8 +195,8 @@ enum errList gsh_echo(void) {
 }
 
 /* Starts executing code from a place in memory */
-enum errList gsh_execute(void) {
-	void (*ptr)(void) = (void*)current_addr;
+err_t gsh_execute(void) {
+	void (*ptr)(void) = (void*)(current_addr);
 	getArg1(ptr);
 
 	(*ptr)();			// Call that function
@@ -203,7 +204,7 @@ enum errList gsh_execute(void) {
 }
 
 /* Writes bytes to memory */
-enum errList gsh_deposit(void) {
+err_t gsh_deposit(void) {
 	uint8_t val, *ptr = (uint8_t*)current_addr;			// Create pointers for the start and end of the section
 
 	requireArg0();
@@ -217,7 +218,7 @@ enum errList gsh_deposit(void) {
 }
 
 /* Handles viewing of memory */
-enum errList gsh_view(void) {
+err_t gsh_view(void) {
 	char *ptr, *end;									// Create start and end pointers
 	uint8_t stat;
 
@@ -236,7 +237,7 @@ enum errList gsh_view(void) {
 }
 
 /* Copies a memory range to other memory */
-enum errList gsh_copy(void) {
+err_t gsh_copy(void) {
 	char *ptr, *end, *dest;								// Create pointers for start, end, and destination of block
 	uint8_t stat;
 
@@ -250,7 +251,7 @@ enum errList gsh_copy(void) {
 	}
 
 	if (end == NULL) return errSYNTAX;
-	requireArg1(dest);
+	requireArg2(dest, char*);
 
 	if (dest <= ptr) {									// If the destination is below the source in memory,
 		while (ptr <= end)
@@ -267,7 +268,7 @@ enum errList gsh_copy(void) {
 }
 
 /* Copies a memory range to other memory, zeroing the source */
-enum errList gsh_move(void) {
+err_t gsh_move(void) {
 	char *ptr, *end, *dest;							// Create pointers for start, end, and destination of block
 	uint8_t stat;
 
@@ -281,7 +282,7 @@ enum errList gsh_move(void) {
 	}
 
 	if (end == NULL) return errSYNTAX;
-	requireArg1(dest);
+	requireArg2(dest, char*);
 
 	if (dest <= ptr) {									// If the destination is below the source in memory,
 		while (ptr <= end) {
@@ -301,7 +302,7 @@ enum errList gsh_move(void) {
 }
 
 /* Fills a memory range with a byte value */
-enum errList gsh_fill(void) {
+err_t gsh_fill(void) {
 	char *ptr, *end, val;
 	uint8_t stat;
 

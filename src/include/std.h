@@ -5,6 +5,7 @@
 #ifndef _STD_H
 #define _STD_H
 
+	#include <hwdeps.h>
 	#include <stdlib.h>
 	#include <stdint.h>
 	#include <stdarg.h>

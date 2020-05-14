@@ -13,11 +13,11 @@
 #define SCREEN_WIDTH	32
 #define SCREEN_HEIGHT	16
 
-#define DEV_DUMMY
+#define DEV_PLAT_COCO2
 
-#define peek_def 		dev_dummy_peek
+#define peek_def 		dev_plat_coco2_peek
 #define putc_def 		dev_virtscreen_putc
-#define getc_def 		dev_dummy_getc
+#define getc_def 		dev_plat_coco2_getc
 #define tty_init_def 	dev_virtscreen_init
 
 //---------------------------------------------------

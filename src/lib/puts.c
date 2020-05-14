@@ -2,6 +2,7 @@
 // Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
 
+	#include <hwdeps.h>
 	#include <std.h>
 	#include <hwdeps.h>
 	#include <io.h>

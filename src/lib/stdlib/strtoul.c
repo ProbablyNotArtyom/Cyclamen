@@ -6,6 +6,7 @@
 //
 //---------------------------------------------------
 
+	#include <hwdeps.h>
 	#include <std.h>
 	#include <string.h>
 	#include <stdarg.h>

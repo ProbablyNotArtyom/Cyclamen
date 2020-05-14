@@ -1,20 +1,31 @@
 //---------------------------------------------------
 // Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
-
+    
 	#include <hwdeps.h>
 	#include <stdbool.h>
+	#include <stdint.h>
+	#include <stdio.h>
+	#include <string.h>
+
 	#include <std.h>
+	#include <ctype.h>
+
+#ifdef DEV_PLAT_COCO2
+#define DEV_PLAT_COCO2
 
 //---------------------------------------------------
 
-extern int gmon(void);
-
-//---------------------------------------------------
-
-//int main(int argc, char **argv) {
-int main(void) {
-	tty_init();
-    while (true) gmon();
-	return 0;
+char last_keypress;
+char dev_plat_coco2_getc(void) {
+	while (true);
+	return 'A';
 }
+
+char dev_plat_coco2_peek(void) {
+    return '\0';
+}
+
+//---------------------------------------------------
+
+#endif

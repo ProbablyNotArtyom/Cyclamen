@@ -7,7 +7,7 @@ AS = lwasm
 AR = lwar
 OBJ = lwobjdump
 
-CCFLAGS = -nodefaultlibs -Wno-const --no-relocate --srec --data=0000 --org=800 -i -S
+CCFLAGS = --no-relocate --srec --data=0000 --org=800 -i -S
 ASFLAGS = --obj -3 -f obj
 LDFLAGS = --format=decb -m$(BINDIR)/cyclamen.map --script=$(BASEDIR)/src/platform/$(ARCH)/$(PLATFORM)/link.ld -L$(SRCDIR)/cpu/$(ARCH) -lcmoc
 

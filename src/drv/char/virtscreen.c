@@ -52,8 +52,8 @@ int dev_virtscreen_putc(char chr) {
 }
 
 char dev_virtscreen_init(void) {
-	uint8_t x, y;
-	uint8_t *scr = (char *)SCREEN;
+	char x, y;
+	char *scr = (char *)SCREEN;
 	for (y = 0; y < SCREEN_HEIGHT; ++y) {
 		scr = (char *)(SCREEN+(SCREEN_WIDTH*y));
 		for (x = 0; x < SCREEN_WIDTH; ++x) scr[x] = ' ';

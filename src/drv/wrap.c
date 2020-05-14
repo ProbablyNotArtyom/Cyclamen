@@ -11,10 +11,12 @@
 	#include <stdio.h>
 	#include <string.h>
 
-extern int putc_def(char chr);
-extern char getc_def(void);
-extern char peek_def(void);
-extern char tty_init_def(void);
+//---------------------------------------------------
+
+int putc_def(char chr);
+char getc_def(void);
+char peek_def(void);
+char tty_init_def(void);
 
 //---------------------------------------------------
 

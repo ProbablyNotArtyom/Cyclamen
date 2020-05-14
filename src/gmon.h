@@ -44,7 +44,7 @@
 #define testArg(err)		if noArgs() return err
 
 
-
+typedef uint8_t err_t;
 static enum errList {
 		errNONE,
 		errSYNTAX,
@@ -68,17 +68,17 @@ extern char *end_addr;
 extern char *cmdStart;
 
 void print_prompt(void);
-enum errList dump_range(char *ptr, char *end);
+err_t dump_range(char *ptr, char *end);
 bool isRange(void);
 bool isArg(void);
-enum errList setCurrents(void);
+err_t setCurrents(void);
 bool isAddr(void);
 char* skipBlank(void);
 char* skipToken(void);
 char* skipHex(void);
 ADDRSIZE strToHEX(void);
-enum errList throw(uint8_t index);
-enum errList getRange(char **lower, char **upper);
+err_t throw(uint8_t index);
+err_t getRange(char **lower, char **upper);
 void printHex(char num);
 void printByte(char num);
 void printWord(uint16_t num);
