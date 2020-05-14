@@ -21,21 +21,21 @@ extern char tty_init_def(void);
 //---------------------------------------------------
 
 int putc(char chr) {
-	asm("");						// Prevent the parent function symbol from being optimized away
+	__asm__("");						// Prevent the parent function symbol from being optimized away
 	return putc_def(chr);
 }
 
 char getc(void) {
-	asm("");						// Prevent the parent function symbol from being optimized away
+	__asm__("");						// Prevent the parent function symbol from being optimized away
 	return (int)getc_def();
 }
 
 char peek(void) {
-	asm("");						// Prevent the parent function symbol from being optimized away
+	__asm__("");						// Prevent the parent function symbol from being optimized away
 	return peek_def();
 }
 
 char tty_init(void) {
-	asm("");						// Prevent the parent function symbol from being optimized away
+	__asm__("");						// Prevent the parent function symbol from being optimized away
 	return tty_init_def();
 }

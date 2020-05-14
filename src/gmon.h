@@ -2,8 +2,8 @@
 // Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
 
-#ifndef HEADER_GSHELL
-#define HEADER_GSHELL
+#ifndef HEADER_GMON
+#define HEADER_GMON
 
 	#include <stdint.h>
 	#include <std.h>
@@ -24,15 +24,26 @@
 
 //---------------------------------------------------
 
-#define queryBreak()	if (peek() == KEY_BREAK) return errBREAK;
-#define isBreak()		(peek() == KEY_BREAK)
+#define getArg(...) 			VA_MACRO(getArg, __VA_ARGS__)
+#define getArg0()				getArg1(0)
+#define getArg1(var)			getArg2(var, void*)
+#define getArg2(var, type)		if (!noArgs() && isAddr()) var = (type)strToHEX()
 
-#define noArgs()		(*skipBlank() == '\0')
-#define testArg(err)	if (*skipBlank() == '\0') return err
+#define requireArg(...) 		VA_MACRO(requireArg, __VA_ARGS__)
+#define requireArg0()			if noArgs() return errNEEDS_ARGS
+#define requireArg1(var)		requireArg0(); else var = (void*)strToHEX()
+#define requireArg2(var, type)	requireArg0(); else var = (type)strToHEX()
 
-#define getArg(var)										\
-		if (*skipBlank() == '\0') return errNEEDS_ARGS;	\
-		else var = (void *)strToHEX();
+#define enforceArgc(...) 		VA_MACRO(enforceArgc, __VA_ARGS__)
+#define enforceArgc0()			if (!noArgs()) return errEXTRA_ARGS
+
+
+#define isBreak()			(peek() == KEY_BREAK)
+#define noArgs()			(*skipBlank() == '\0')
+#define queryBreak()		if isBreak() return errBREAK;
+#define testArg(err)		if noArgs() return err
+
+
 
 static enum errList {
 		errNONE,
@@ -46,9 +57,9 @@ static enum errList {
 		errDO_EXIT
 };
 
-extern const char funcKeys[];
+extern const char const funcKeys[];
 extern const char *const errors[];
-extern const char hexTable[];
+extern const char const hexTable[];
 
 extern bool isCurrentVar;
 extern char *parse;

@@ -15,22 +15,22 @@
 
 static bool gsh_do_cmd(uint8_t num);
 
-const enum errList gsh_version(void);
-const enum errList gsh_help(void);
-const enum errList gsh_exit(void);
-const enum errList gsh_echo(void);
-const enum errList gsh_execute(void);
-const enum errList gsh_deposit(void);
-const enum errList gsh_view(void);
-const enum errList gsh_copy(void);
-const enum errList gsh_move(void);
-const enum errList gsh_fill(void);
+enum errList gsh_version(void);
+enum errList gsh_help(void);
+enum errList gsh_exit(void);
+enum errList gsh_echo(void);
+enum errList gsh_execute(void);
+enum errList gsh_deposit(void);
+enum errList gsh_view(void);
+enum errList gsh_copy(void);
+enum errList gsh_move(void);
+enum errList gsh_fill(void);
 
 //-----------------------------------Tables------------------------------------
 
-const char hexTable[] = "0123456789abcdef";
+const char const hexTable[] = "0123456789abcdef";
 
-const enum errList (* funcTable[])(void) = {
+enum errList (*const funcTable[])(void) = {
 	&gsh_version,
 	&gsh_help,
 	&gsh_exit,
@@ -44,7 +44,7 @@ const enum errList (* funcTable[])(void) = {
 	NULL
 };
 
-const char funcKeys[] = {
+const char const funcKeys[] = {
 	'v',
 	'h',
 	'q',
@@ -55,10 +55,10 @@ const char funcKeys[] = {
 	'z',
 	'm',
 	'x',
-	0
+	NULL
 };
 
-const char *helpText[] = {
+const char *const helpText[] = {
 	"-=-= commands -=-=-=-=-=-=-=-=-\n",
 	"r <$/%>     dump memory\n",
 	": (#)       deposit bytes\n",
@@ -68,11 +68,11 @@ const char *helpText[] = {
 	"h           print help\n",
 	"z <%>, ($)  copy range to addr\n",
 	"m <%>, ($)  move range to addr\n",
-	"x <%>, ($)  fill range with byte\n",
-	"\n\0"
+	"x <%>, ($)  fill range with byte\n\n",
+	NULL
 };
 
-const char* const errors[] = {
+const char *const errors[] = {
 	"",
 	"(?) bad syntax\n",
 	"(?) invalid function\n",
@@ -96,10 +96,12 @@ static uint8_t numCMDs;
 static uint16_t numLoops;
 static char inBuffer[BUFFLEN];						// Our input buffer
 
+//-----------------------------------------------------------------------------
+
 int gmon(void) {
 	doExit = false;
-	current_addr = 0x00;
 	end_addr = 0x00;
+	current_addr = 0x00;
 	puts("g'mon version " GMON_VERSION "\r");
 	while (!doExit) {
 		print_prompt();
@@ -111,13 +113,14 @@ int gmon(void) {
 			numLoops = 1;
 			numCMDs = 0x01;
 			skipBlank();
-			cmdStart = parse;
-			if (*cmdStart == '/') {
+			if (*parse == '/') {
+				cmdStart = parse++;
 				while (*cmdStart != '/') cmdStart++;
-				numLoops = strtoul(parse+1, NULL, 10);
-				cmdStart += 2;
+				*cmdStart = ' ';
+				numLoops = (uint16_t)strToHEX();
+				parse++;
 			}
-			parse = cmdStart;
+			cmdStart = parse;
 			for (tmp = parse; *tmp != '\0'; tmp++) if (*tmp == ';') numCMDs += 1;
 			while (numLoops > 0) {
 				gsh_do_cmd(numCMDs);
@@ -163,27 +166,27 @@ static bool gsh_do_cmd(uint8_t num) {
 //----------------------------------Builtins-----------------------------------
 
 /* Exits the monitor */
-const enum errList gsh_exit(void) {
-	if (!noArgs()) return errEXTRA_ARGS;
+enum errList gsh_exit(void) {
+	enforceArgc0();
 	doExit = true;
 	return errNONE;
 }
 
-const enum errList gsh_version(void) {
-	if (!noArgs()) return errEXTRA_ARGS;
+enum errList gsh_version(void) {
+	enforceArgc0();
 	puts("g'mon version " GMON_VERSION "\r");
 	return errNONE;
 }
 
-const enum errList gsh_help(void) {
-	int i;
-	if (!noArgs()) return errEXTRA_ARGS;
-	for (i = 0; helpText[i] != NULL; i++) puts(helpText[i]);
+enum errList gsh_help(void) {
+	uint8_t i = 0;
+	enforceArgc0();
+	while (helpText[i] != NULL) puts(helpText[i++]);
 	return errNONE;
 }
 
-const enum errList gsh_echo(void) {
-	if (noArgs()) return errNEEDS_ARGS;
+enum errList gsh_echo(void) {
+	requireArg0();
 
 	puts(parse);
 	putc('\n');
@@ -191,19 +194,19 @@ const enum errList gsh_echo(void) {
 }
 
 /* Starts executing code from a place in memory */
-const enum errList gsh_execute(void) {
+enum errList gsh_execute(void) {
 	void (*ptr)(void) = (void*)current_addr;
-	if (!noArgs() && isAddr()) ptr = (void*)strToHEX();
+	getArg1(ptr);
 
 	(*ptr)();			// Call that function
 	return errNONE;		// Return error free, assuming that whatever we call actually returns (good chance it wont)
 }
 
 /* Writes bytes to memory */
-const enum errList gsh_deposit(void) {
+enum errList gsh_deposit(void) {
 	uint8_t val, *ptr = (uint8_t*)current_addr;			// Create pointers for the start and end of the section
 
-	if (noArgs()) return errNEEDS_ARGS;
+	requireArg0();
 	while (!noArgs()) {
 		val = (uint8_t)strToHEX();
 		*(uint8_t*)(ptr++) = (uint8_t)val;
@@ -214,10 +217,11 @@ const enum errList gsh_deposit(void) {
 }
 
 /* Handles viewing of memory */
-const enum errList gsh_view(void) {
+enum errList gsh_view(void) {
 	char *ptr, *end;									// Create start and end pointers
 	uint8_t stat;
 
+	skipBlank();
 	if (!noArgs()) {
 		while(*parse != '\0') {
 			stat = getRange(&ptr, &end);
@@ -232,10 +236,11 @@ const enum errList gsh_view(void) {
 }
 
 /* Copies a memory range to other memory */
-const enum errList gsh_copy(void) {
+enum errList gsh_copy(void) {
 	char *ptr, *end, *dest;								// Create pointers for start, end, and destination of block
 	uint8_t stat;
 
+	skipBlank();
 	if (isRange()) {
 		stat = getRange(&ptr, &end);
 		if (stat != errNONE) return stat;
@@ -244,24 +249,29 @@ const enum errList gsh_copy(void) {
 		end = end_addr;
 	}
 
-	getArg(dest);
+	if (end == NULL) return errSYNTAX;
+	requireArg1(dest);
+
 	if (dest <= ptr) {									// If the destination is below the source in memory,
 		while (ptr <= end)
-			*(uint8_t*)(dest--) = *ptr--;
+			*(uint8_t*)(dest++) = *ptr++;
 	} else {
 		dest += end - ptr;								// If the destination is above the start of the source,
-		while (end >= ptr)
+		while (end >= ptr) {
 			*(uint8_t*)(dest--) = *end--;
+			if (end == 0x00) break;
+		}
 	}													// This is done to avoid overwriting the source before we can copy it
 
 	return errNONE;
 }
 
 /* Copies a memory range to other memory, zeroing the source */
-const enum errList gsh_move(void) {
+enum errList gsh_move(void) {
 	uint8_t *ptr, *end, *dest;							// Create pointers for start, end, and destination of block
 	uint8_t stat;
 
+	skipBlank();
 	if (isRange()) {
 		stat = getRange(&ptr, &end);
 		if (stat != errNONE) return stat;
@@ -270,7 +280,9 @@ const enum errList gsh_move(void) {
 		end = end_addr;
 	}
 
-	getArg(dest);
+	if (end == NULL) return errSYNTAX;
+	requireArg1(dest);
+
 	if (dest <= ptr) {									// If the destination is below the source in memory,
 		while (ptr <= end) {
 			*(uint8_t*)(dest++) = *ptr;					// Copy it starting at the beginning
@@ -279,8 +291,9 @@ const enum errList gsh_move(void) {
 	} else {
 		dest += end - ptr;								// If the destination is above the start of the source,
 		while (end >= ptr) {
-			*(uint8_t*)(dest++) = *end;
-			*(uint8_t*)(end++) = NULL;
+			*(uint8_t*)(dest--) = *end;
+			*(uint8_t*)(end--) = NULL;
+			if (end == 0x00) break;
 		}
 	}													// This is done to avoid overwriting the source before we can copy it
 
@@ -288,10 +301,11 @@ const enum errList gsh_move(void) {
 }
 
 /* Fills a memory range with a byte value */
-const enum errList gsh_fill(void) {
+enum errList gsh_fill(void) {
 	uint8_t *ptr, *end, val;
 	uint8_t stat;
 
+	skipBlank();
 	if (isRange()) {
 		stat = getRange(&ptr, &end);
 		if (stat != errNONE) return stat;
@@ -300,7 +314,9 @@ const enum errList gsh_fill(void) {
 		end = end_addr;
 	}
 
-	getArg(val);
+	if (end == NULL) return errSYNTAX;
+	requireArg2(val, uint8_t);
+
 	while (ptr <= end) *(uint8_t*)(ptr++) = val;		// Set every byte from *ptr to *end to the pattern in val
 	return errNONE;
 }

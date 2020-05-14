@@ -1,9 +1,14 @@
+;---------------------------------------------------
+; Cyclamen - NotArtyom - 2020
+;---------------------------------------------------
 
 	.include        "zeropage.inc"
 	.include        "c64.inc"
 
 	.import mmusave
 	.export _platform_init
+
+;---------------------------------------------------
 
 COLOR_BLACK             = $00
 COLOR_WHITE             = $01
@@ -21,6 +26,8 @@ COLOR_GRAY2             = $0C
 COLOR_LIGHTGREEN        = $0D
 COLOR_LIGHTBLUE         = $0E
 COLOR_GRAY3             = $0F
+
+;---------------------------------------------------
 
 .segment "STARTUP"
 

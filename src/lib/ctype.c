@@ -48,3 +48,11 @@ int isAscii(int val) {
 int isAlnum(int val) {
 	return isDigit(val) || isAlpha(val);
 }
+
+int isHexAlpha(int val) {
+	return ((char)val <= 'f' && (char)val >= 'a');
+}
+
+int isHex(int val) {
+	return isDigit(val) || isHexAlpha(toLower(val));
+}

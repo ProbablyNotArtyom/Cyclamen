@@ -13,5 +13,6 @@ int toUpper(int val);
 int toLower(int val);
 int isAscii(int val);
 int isAlnum(int val);
+int isHex(int val);
 
 #endif

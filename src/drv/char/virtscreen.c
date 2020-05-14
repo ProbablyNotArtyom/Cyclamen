@@ -11,45 +11,52 @@
 
 //---------------------------------------------------
 
-static char xpos = 0, ypos = 0;
+char xpos, ypos;
+const uint8_t scr_width = SCREEN_WIDTH;
 
 //---------------------------------------------------
 
+#ifndef scroll_screen				// Allow platforms to supply their own optimized scrolling routine
 static void scroll_screen(void) {
 	char i, x;
-	char *scrptr;
-	for (i = 0; i < (SCREEN_HEIGHT-1); i++) {
-		scrptr = (char *)(SCREEN+(SCREEN_WIDTH*i));
-		for (x = 0; x < SCREEN_WIDTH; x++) scrptr[x] = scrptr[SCREEN_WIDTH + x];
+	char *scr;
+	for (i = 0; i < (SCREEN_HEIGHT-1); ++i) {
+		scr = (char *)(SCREEN+(SCREEN_WIDTH*i));
+		for (x = 0; x < SCREEN_WIDTH; ++x) scr[x] = scr[SCREEN_WIDTH + x];
 	}
-	scrptr = (char *)(SCREEN + (SCREEN_WIDTH*(SCREEN_HEIGHT-1)));
-	for (i = 0; i < SCREEN_WIDTH; i++) scrptr[i] = ' ';
+	scr = (char *)(SCREEN + (SCREEN_WIDTH*(SCREEN_HEIGHT-1)));
+	for (i = 0; i < SCREEN_WIDTH; ++i) scr[i] = ' ';
 }
+#endif
 
 int dev_virtscreen_putc(char chr) {
 	if (xpos >= SCREEN_WIDTH || chr == '\n' || chr == '\r') {
 		xpos = 0;
-		ypos++;
+		++ypos;
 	}
 	if (ypos >= SCREEN_HEIGHT) {
-		ypos--;
+		--ypos;
 		scroll_screen();
 	}
 
 	if (chr != '\n' && chr != '\r') {
 		*(char *)(SCREEN + (SCREEN_WIDTH*ypos) + xpos) = chr;
-		xpos++;
+		++xpos;
 	}
 	return 0;
 }
 
 char dev_virtscreen_init(void) {
-	uint8_t *scr = (char *)SCREEN;
 	uint8_t x, y;
-	for (y = 0; y < SCREEN_HEIGHT; y++) {
+	uint8_t *scr = (char *)SCREEN;
+	for (y = 0; y < SCREEN_HEIGHT; ++y) {
 		scr = (char *)(SCREEN+(SCREEN_WIDTH*y));
-		for (x = 0; x < SCREEN_WIDTH; x++) scr[x] = ' ';
+		for (x = 0; x < SCREEN_WIDTH; ++x) scr[x] = ' ';
 	}
+
+	// Statically init globals
+	xpos = 0;
+	ypos = 0;
 	return 0;
 }
 

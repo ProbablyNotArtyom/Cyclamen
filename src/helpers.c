@@ -27,8 +27,7 @@ void print_prompt(void) {
 		putc('.');
 		printWord((ADDRSIZE)end_addr);
 	}
-	puts(")\n");
-	puts(" $ ");
+	puts(")\n $ ");
 }
 
 enum errList dump_range(char *ptr, char *end) {
@@ -58,15 +57,14 @@ enum errList dump_range(char *ptr, char *end) {
 }
 
 bool isAddr(void) {
-	uint8_t i;
-	for (i = 0; *parse != hexTable[i] && hexTable[i] != '\0'; i++);
-	return (hexTable[i] != '\0');
+	return isHex(*parse);
 }
 
 bool isRange(void) {
+	char i = 0;
 	char *tmpParse = parse;
-	while (*tmpParse != '.' && *tmpParse != ',' && *tmpParse != '\0') tmpParse++;
-	if (*tmpParse != '.' && *tmpParse != ',') return false;
+	while (isHex(tmpParse[i])) i++;
+	if (tmpParse[i] != '.' && tmpParse[i] != ',') return false;
 	return true;
 }
 
@@ -86,10 +84,8 @@ char *skipToken(void) {
 }
 
 char *skipHex(void) {
-	uint8_t i;
 	while (true) {
-		for (i = 0; *parse != hexTable[i] && hexTable[i] != '\0'; i++);
-		if (hexTable[i] == '\0') return parse;
+		if (!isHex(*parse)) return parse;
 		parse++;
 	}
 }
@@ -117,11 +113,14 @@ enum errList throw(uint8_t index) {
 enum errList getRange(char **lower, char **upper) {
 	if (isAddr()) {
 		*lower = (void *)strToHEX();
+		while (isHex(*parse)) parse++;
 	} else if (*parse == '.' || *parse == ',') {
 		*lower = current_addr;
 	} else {
 		return errUNDEF;
 	}
+
+
 
 	if (*parse == '.' || *parse == ',') {
 		char tmp = *parse;
@@ -129,15 +128,17 @@ enum errList getRange(char **lower, char **upper) {
 		if (noArgs()) return errBAD_RANGE;
 		if (!isAddr()) return errBAD_HEX;
 		if (tmp == '.')
-			*upper = strToHEX();
+			*upper = (void *)strToHEX();
 		else
-			*upper = (strToHEX() + *lower);
+			*upper = (void *)(strToHEX() + *lower);
 	} else {
-		if (*parse != ' ' || *parse != '\0') skipToken();
+		skipToken();
 		*upper = NULL;
 	}
 	return errNONE;
 }
+
+//-----------------------------------------------------------------------------
 
 void printHex(char num) {
 	putc(hexTable[(num & 0x0F)]);

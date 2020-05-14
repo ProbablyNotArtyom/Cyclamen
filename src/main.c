@@ -11,7 +11,8 @@ extern int gmon(void);
 
 //---------------------------------------------------
 
-int main(int argc, char **argv) {
+//int main(int argc, char **argv) {
+int main(void) {
 	tty_init();
 	while (true) gmon();
 	return 0;

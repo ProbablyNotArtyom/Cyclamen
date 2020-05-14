@@ -8,7 +8,7 @@
 
 		.import 		_platform_init
         .import         initlib, donelib
-        .import         zerobss, callmain
+        .import         zerobss, _main
         .import         BSOUT
         .import         __STACK__, __STACKSIZE__		; from configure file
         .importzp       ST
@@ -38,7 +38,8 @@ RESET_VEC:
 
 ; Push the command-line arguments; and, call main().
 
-        jsr     callmain
+        ldy     #0              ; Argument size
+        jmp     _main
 
 ; Back from main() [this is also the exit() entry]. Run the module destructors.
 

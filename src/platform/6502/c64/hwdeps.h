@@ -20,6 +20,9 @@
 #define getc_def 		dev_plat_c64_getc
 #define tty_init_def 	dev_virtscreen_init
 
+#define scroll_screen	plat_c64_scroll
+extern void plat_c64_scroll(void);
+
 //---------------------------------------------------
 
 #endif
