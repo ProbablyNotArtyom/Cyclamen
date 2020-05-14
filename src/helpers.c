@@ -57,7 +57,7 @@ enum errList dump_range(char *ptr, char *end) {
 }
 
 bool isAddr(void) {
-	return isHex(*parse);
+	return (char)isHex(*parse);
 }
 
 bool isRange(void) {

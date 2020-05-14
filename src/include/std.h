@@ -9,13 +9,13 @@
 	#include <stdint.h>
 	#include <stdarg.h>
 
-#ifdef CPU_6809
-#define const	_CMOC_CONST_
-#endif
-
-#ifdef CPU_6309
-#define const	_CMOC_CONST_
-#endif
+// #ifdef CPU_6809
+// #define const	_CMOC_CONST_
+// #endif
+// 
+// #ifdef CPU_6309
+// #define const	_CMOC_CONST_
+// #endif
 
 //---------------------------------------------------
 

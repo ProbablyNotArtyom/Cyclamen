@@ -2,17 +2,22 @@
 // Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
 
-#ifndef DEV_VIRTSCREEN
-#define DEV_VIRTSCREEN
-
+    #include <hwdeps.h>
 	#include <std.h>
 	#include <hwdeps.h>
 	#include <io.h>
 
+#ifdef DEV_VIRTSCREEN
+#define DEV_VIRTSCREEN
+
 //---------------------------------------------------
 
-char xpos, ypos;
-const uint8_t scr_width = SCREEN_WIDTH;
+    char xpos, ypos;
+    const uint8_t scr_width = SCREEN_WIDTH;
+
+    static void scroll_screen(void);
+    int dev_virtscreen_putc(char chr);
+    char dev_virtscreen_init(void);
 
 //---------------------------------------------------
 

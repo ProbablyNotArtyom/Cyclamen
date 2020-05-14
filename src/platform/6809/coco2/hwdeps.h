@@ -6,8 +6,20 @@
 
 #define CPU_6809
 
+//---------------------------------------------------
+
+#define DEV_VIRTSCREEN
 #define SCREEN			0x400
 #define SCREEN_WIDTH	32
 #define SCREEN_HEIGHT	16
+
+#define DEV_DUMMY
+
+#define peek_def 		dev_dummy_peek
+#define putc_def 		dev_virtscreen_putc
+#define getc_def 		dev_dummy_getc
+#define tty_init_def 	dev_virtscreen_init
+
+//---------------------------------------------------
 
 #endif

@@ -30,7 +30,7 @@ enum errList gsh_fill(void);
 
 const char const hexTable[] = "0123456789abcdef";
 
-enum errList (*const funcTable[])(void) = {
+enum errList (* funcTable[])(void) = {
 	&gsh_version,
 	&gsh_help,
 	&gsh_exit,
@@ -254,11 +254,11 @@ enum errList gsh_copy(void) {
 
 	if (dest <= ptr) {									// If the destination is below the source in memory,
 		while (ptr <= end)
-			*(uint8_t*)(dest++) = *ptr++;
+			*(char*)(dest++) = *ptr++;
 	} else {
 		dest += end - ptr;								// If the destination is above the start of the source,
 		while (end >= ptr) {
-			*(uint8_t*)(dest--) = *end--;
+			*(char*)(dest--) = *end--;
 			if (end == 0x00) break;
 		}
 	}													// This is done to avoid overwriting the source before we can copy it
@@ -268,7 +268,7 @@ enum errList gsh_copy(void) {
 
 /* Copies a memory range to other memory, zeroing the source */
 enum errList gsh_move(void) {
-	uint8_t *ptr, *end, *dest;							// Create pointers for start, end, and destination of block
+	char *ptr, *end, *dest;							// Create pointers for start, end, and destination of block
 	uint8_t stat;
 
 	skipBlank();
@@ -285,14 +285,14 @@ enum errList gsh_move(void) {
 
 	if (dest <= ptr) {									// If the destination is below the source in memory,
 		while (ptr <= end) {
-			*(uint8_t*)(dest++) = *ptr;					// Copy it starting at the beginning
-			*(uint8_t*)(ptr++) = NULL;
+			*(char*)(dest++) = *ptr;					// Copy it starting at the beginning
+			*(char*)(ptr++) = NULL;
 		}
 	} else {
 		dest += end - ptr;								// If the destination is above the start of the source,
 		while (end >= ptr) {
-			*(uint8_t*)(dest--) = *end;
-			*(uint8_t*)(end--) = NULL;
+			*(char*)(dest--) = *end;
+			*(char*)(end--) = NULL;
 			if (end == 0x00) break;
 		}
 	}													// This is done to avoid overwriting the source before we can copy it
@@ -302,7 +302,7 @@ enum errList gsh_move(void) {
 
 /* Fills a memory range with a byte value */
 enum errList gsh_fill(void) {
-	uint8_t *ptr, *end, val;
+	char *ptr, *end, val;
 	uint8_t stat;
 
 	skipBlank();
@@ -315,8 +315,8 @@ enum errList gsh_fill(void) {
 	}
 
 	if (end == NULL) return errSYNTAX;
-	requireArg2(val, uint8_t);
+	requireArg2(val, char);
 
-	while (ptr <= end) *(uint8_t*)(ptr++) = val;		// Set every byte from *ptr to *end to the pattern in val
+	while (ptr <= end) *(char*)(ptr++) = val;		// Set every byte from *ptr to *end to the pattern in val
 	return errNONE;
 }

@@ -1,10 +1,8 @@
 //---------------------------------------------------
 // Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
-
-#ifndef DEV_PLAT_C64
-#define DEV_PLAT_C64
-
+    
+	#include <hwdeps.h>
 	#include <stdbool.h>
 	#include <stdint.h>
 	#include <stdio.h>
@@ -12,6 +10,9 @@
 
 	#include <std.h>
 	#include <ctype.h>
+
+#ifdef DEV_PLAT_C64
+#define DEV_PLAT_C64
 
 //---------------------------------------------------
 
