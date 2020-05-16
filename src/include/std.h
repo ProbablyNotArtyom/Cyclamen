@@ -13,10 +13,13 @@
 // #ifdef CPU_6809
 // #define const	_CMOC_CONST_
 // #endif
-// 
+//
 // #ifdef CPU_6309
 // #define const	_CMOC_CONST_
 // #endif
+
+#define CYCLAMEN_VERSION	"v0.3"
+#define CYCLAMEN_DATE		"15-5-20"
 
 //---------------------------------------------------
 

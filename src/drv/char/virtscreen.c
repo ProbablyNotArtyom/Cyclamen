@@ -62,6 +62,7 @@ char dev_virtscreen_init(void) {
 	// Statically init globals
 	xpos = 0;
 	ypos = 0;
+	puts("virtscreen driver v0.5 (notartyom)\n");
 	return 0;
 }
 

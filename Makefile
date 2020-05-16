@@ -40,6 +40,13 @@ $(error "[!] PLATFORM is not set. Either pass it as an environment variable or u
 endif
 endif
 
+# !!!!!!!!!!!!!! Kbuild experimental support !!!!!!!!!!!!!!
+# We need some generic definitions (do not try to remake the file).
+MAKEFLAGS += --no-print-directory --include-dir=$(BASEDIR)
+$(BASEDIR)/scripts/Kbuild.include: ;
+include $(BASEDIR)/scripts/Kbuild.include
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # Append the default flags to the ones supplied by the target
 
@@ -100,3 +107,35 @@ clean:
 	rm -rf $(OBJDIR)/*
 	rm -rf $(BINDIR)/*
 	rm -f $(BINARY_NAME)
+
+#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+# !!!!!!!!!!!!!! Kbuild experimental support !!!!!!!!!!!!!!
+HOSTCC       = gcc
+HOSTCXX      = g++
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer
+HOSTCXXFLAGS = -O2
+
+# Basic helpers built in scripts/
+PHONY += scripts_basic
+scripts_basic:
+	@$(MAKE) $(build)=scripts/basic
+
+# To avoid any implicit rule to kick in, define an empty command.
+scripts/basic/%: scripts_basic ;
+
+config: scripts_basic
+#	@mkdir -p include/linux include/config
+	@$(MAKE) $(build)=scripts/kconfig $@
+
+menuconfig: scripts_basic
+#	@mkdir -p include/linux include/config
+	@$(MAKE) $(build)=scripts/kconfig $@
+
+PHONY += FORCE
+FORCE:
+
+# Declare the contents of the .PHONY variable as phony.  We keep that
+# information in a variable so we can use it in if_changed and friends.
+.PHONY: $(PHONY)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
