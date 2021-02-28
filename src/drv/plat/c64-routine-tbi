@@ -1,0 +1,778 @@
+by Craig Bruce  <csbruce@neumann.uwaterloo.ca>
+
+1. INTRODUCTION
+
+This article examines a three-key rollover mechanism for the keyboards of the
+C-128 and C-64 and presents Kernal-wedge implementations for both machines.
+Webster's doesn't seem to know, so I'll tell you that this means that the
+machine will act sensibly if you are holding down one key and then press
+another without releasing the first (or even press a third key while holding
+down two others).  This is useful to fast touch typers.  In fact, fast typing
+without rollover can be quite annoying; you get a lot of missing letters.
+
+Another annoying property of the kernel keyscanning is joystick interference.
+If you move the joystick plugged into port #1, you will notice that some junk
+keystrokes result.  The keyscanners here eliminate this problem by simply
+checking if the joystick is pressed and ignoring the keyboard if it is.
+
+The reason that a 3-key rollover is implemented instead of the more general
+N-key rollover is that scanning the keyboard becomes more and more unreliable
+as more keys are held down.  Key "shaddows" begin to appear to make it look
+like you are holding down a certain key when you really are not.  So, by
+limiting the number of keys scanned to 3, some of this can be avoided.  You
+will get strange results if you hold down more than three keys at a time, and
+even sometimes when holding down 3 or less.  The "shift" keys (Shift,
+Commodore, Control, Alternate, and CapsLock) don't count in the 3 keys of
+rollover, but they do make the keyboard harder to read correctly.
+Fortunately, three keys will allow you to type words like "AND" and "THE"
+without releasing any keys.
+
+2. USER GUIDE
+
+Using these utilities is really easy - you just type away like normal.  To
+install the C-128 version, enter:
+
+BOOT "KEYSCAN128"
+
+and you're in business.  The program will display "Keyscan128 installed" and
+go to work.  The program loads into memory at addresses $1500-$17BA (5376-6074
+decimal), so you'll want to watch out for conflicts with other utilities.
+This program also takes over the IRQ vector and the BASIC restart vector
+($A00).  The program will survive a RUN/STOP+RESTORE.  To uninstall this
+program, you must reset the machine (or poke the kernel values back into the
+vectors); it does not uninstall itself.
+
+Loading the C-64 version is a bit trickier, so a small BASIC loader program is
+provided.  LOAD and RUN the "KEYSCAN64.BOOT" program.  It will load the
+"KEYSCAN64" program into memory at addresses $C500-$C77E (50432-51070 decimal)
+and execute it (with a SYS 50432).  To uninstall the program, enter SYS 50435.
+The program takes over the IRQ and NMI vectors and only gives them back to the
+kernel upon uninstallation.  The program will survive a RUN/STOP+RESTORE.
+
+Something that you may or may not know about the C-64 is that its keys can be
+made to repeat by poking to address 650 decimal.  POKE650,128 will enable the
+repeating of all keys.  POKE650,0 will enable only the repeating of the SPACE,
+DELETE, and CURSOR keys.  POKE650,64 will disable the repeating of all keys.
+An unusual side effect of changing this to either full repeat or no repeat is
+that holding down SHIFT+COMMODORE (character set shift) will repeat rapidly.
+
+To see the rollover in action, hold down the "J" key for a while, and then
+press "K" without releasing "J".  "K" will come out as expected, as it would
+with the kernal.  Now, release the "J" key.  If you are on a C-128, you will
+notice that the "K" key will now stop repeating (this is actually an important
+feature - it avoids problems if you don't release all of the keys you are
+holding down, at once).  Now, press and hold the "J" key again without
+releasing the "K".  "J" will now appear.  It wouldn't using the Kernal key
+scanner.  You can also try this with 3-key combinations.  There will be some
+combinations that cause problems; more on this below.
+
+Also, take a spaz on the joystick plugged into port #1 and observe that no
+garbage gets typed in.  This was an annoying problem with the kernel of both
+the 64 and 128 and has lead many different games to picking between joystick
+#1 and #2 as the primary controller.  The joystick in port #2 is not a problem
+to either Keyscan-128/64 or the Kernal.
+
+3. KEYBOARD SCANNING
+
+The Kernal scans the keyboard sixty times a second to see what keys you are
+holding down.  Because of hardware peculiarities, there are multiple scanning
+techniques that will give different results.
+
+3.1. SCANNING EXAMPLE
+
+An example program is included to demonstrate different keyboard scanning
+techniques possible.  To run it from a C-128 in 40-column (slow) mode, enter:
+
+BOOT "KEYSHOW"
+
+On a C-64, you must:
+
+LOAD "KEYSHOW",8,1
+
+and then:
+
+SYS 4864
+
+The same program works on both machines.  Four maps of the keyscanning matrix
+will be displayed on the 40-column screen, as scanned by different techniques.
+The leftmost one is scanned from top to bottom "quickly".  The second from the
+left scans from bottom to top "quickly".  The third from the left scans the
+keyboard sideways, and the rightmost matrix scans the keys from top to bottom
+"slowly".
+
+The mapping of keyscan matrix positions to keys is as follows:
+
+ROWS: \             COLUMNS:    peek($DC01)
+poke   \
+$DC00   \   128      64      32      16      8       4       2       1
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+  255-1  | DOWN  |   F5  |   F3  |   F1  |   F7  | RIGHT | RETURN| DELETE|
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+  255-2  |LEFT-SH|   E   |   S   |   Z   |   4   |   A   |   W   |   3   |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+  255-4  |   X   |   T   |   F   |   C   |   6   |   D   |   R   |   5   |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+  255-8  |   V   |   U   |   H   |   B   |   8   |   G   |   Y   |   7   |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+ 255-16  |   N   |   O   |   K   |   M   |   0   |   J   |   I   |   9   |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+ 255-32  |   ,   |   @   |   :   |   .   |   -   |   L   |   P   |   +   |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+ 255-64  |   /   |   ^   |   =   |RGHT-SH|  HOME |   ;   |   *   |   \   |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+255-128  | STOP  |   Q   |COMMODR| SPACE |   2   |CONTROL|   _   |   1   |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+
+The following table contains the additional keys which must be scanned on the
+C128 (but which are not displayed by the example scanning program).
+
+ROWS: \               COLUMNS:    peek($DC01)
+poke   \
+$D02F   \   128      64      32      16      8       4       2       1
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+  255-1  |   1   |   7   |   4   |   2   |  TAB  |   5   |   8   |  HELP |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+  255-2  |   3   |   9   |   6   | ENTER |   LF  |   -   |   +   |  ESC  |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+  255-4  |NO-SCRL| RIGHT |  LEFT |  DOWN |   UP  |   .   |   0   |  ALT  |
+         +-------+-------+-------+-------+-------+-------+-------+-------+
+
+These tables are presented on page 642 of the Commodore 128 Programmer's
+Reference Guide.  The scan codes that are stored in location 212 on the C128
+and location 197 on the C64 are calculated based on the above tables.  The
+entry in the "1" bit position of the first line of the first table (DELETE)
+has a scan code of 0, the "2" entry (RETURN) has a scan code of 1, etc., the
+entry on the second scan line in the "1" position ("3") has a scan code of 8,
+etc., all the way down to code 63.  The scan codes for the 128 go all the way
+to 87, continuing in the second table like the first.
+
+You will notice some strange effects of the different scanning techniques when
+you hold down multiple keys.  More on this below.  Also try pushing joystick
+#1 around.
+
+3.2. SCANNING HARDWARE
+
+To scan the 128 keyboard, you must poke a value into $DC00 (CIA#1 port A) and
+$D02F (VIC chip keyboard select port) to select the row to be scanned.  The
+Data Direction Register for this port will be set to all outputs by the
+Kernal, so you don't have to worry about it.  Each bit of $DC00 and the three
+least significant bits of $D02F are used for selecting rows.  A "0" bit means
+that a row IS selected, and a "1" means that a row IS NOT selected.  The poke
+value to use for selecting among the various rows are given in the two tables
+in the previous section.
+
+Using one bit per row allows you to select multiple rows at the same time.  It
+can be useful to select all rows at one time or no rows.  To read the row that
+has been selected, simply peek at location $DC01 (CIA#1 port B).  Each bit
+will tell you whether the corresponding key is currently being held down or
+not.  Again, we have reverse logic; a "0" means that the key is being held
+down, and a "1" means that the key is not held down.  The bit values
+corresponding to the keys are given as the column headings in the tables in
+the previous section.  Since there is no such thing as a perfect mechanical
+switch, it is recommended that you "debounce" each key row read in the
+following way:
+
+again:
+   lda $dc01
+   cmp $dc01
+   bne again
+
+So, to scan the entire keyboard, you simply select each scan row in some
+order, and read and remember the keys held down on the row.  As it turns out,
+you have to be a bit careful of exactly how you "select" a row.  Also, there
+is a shortcut that you can take.  In order to find out if any key is being
+held down in one operation, all you have to do is select all rows at once and
+see if there are any "0" bits in the read value.  If so, there is a key being
+held down somewhere; if not, then there is no key being held down, so you
+don't have to bother scanning the entire keyboard.  This will reduce our
+keyscanning significantly, which is important, since the keyboard will be
+scanned every 1/60 of a second.
+
+As mentioned above, joystick #1 will interfere with the Kernal reading the
+keyboard.  This is because the read value of joystick #1 is wired into CIA#1
+port A, the same place that the keyboard read is wired in.  So, whenever a
+switch in the joystick is pushed, the corresponding bit of the keyboard scan
+register will be forced to "0", regardless of which keys are pressed and
+regardless of which scan row is selected.  There's the catch.  If we were to
+un-select all scan rows and still notice "0"s in the keyboard read register,
+then we would know that the joystick was being pushed and would interfere with
+our keyboard scanning, so we could abort keyboard scanning and handle this
+case as if no keys were being held down.
+
+It still would be possible but unlikely that the user could push the joystick
+in the middle of us scanning the keyboard and screw up our results, so to
+defend against this, we check for the joystick being pushed both before and
+after scanning the keyboard.  If we find that the joystick is pushed at either
+of these times, then we throw out the results and assume that no keys are held
+down.  This way, the only way that a user could screw up the scanning is if
+he/she/it were to press a switch after we begin scanning and release it before
+we finish scanning.  Not bloody likely for a human.
+
+You get the same deal for keyboard scanning on the 64, except you only need to
+use $DC00 for selecting the scan rows.  Also note that you will not be able to
+play with keyboard scanning from BASIC because of the interrupt reading of the
+keyboard.  You must make sure that interrupts are disabled when playing with
+the keyboard hardware, or interrupt scanning can come along at any time and
+change all of the register settings.
+
+3.3. SCANNING SOURCE CODE
+
+The four keyboard scanning techniques of the example program are presented
+below.  The declarations required for all of them are:
+
+pa = $dc00        ;row select
+pb = $dc01        ;column read
+ddra = $dc02      ;ddr for row select
+ddrb = $dc03      ;ddr for column read
+scanTable .buf 8  ;storage for scan
+mask = $03        ;work location
+
+The code is as follows, in Buddy format.  Each routine scans the keyboard and
+stores the results in the "scanTable" table.
+
+------------------+------------------+------------------+------------------+
+ Row forward fast | Row backward fast| Column right     | Row forward slow
+------------------+------------------+------------------+------------------+
+  sei             |  sei             |  sei             |  sei
+  ldx #0          |  ldx #7          |  lda #$00        |  ldx #0
+  lda #$fe        |  lda #$7f        |  sta ddra        |  lda #$fe
+  sta pa          |  sta pa          |  lda #$ff        |  sta mask
+  nextRow = *     |  nextRow = *     |  sta ddrb        |  nextRow = *
+- lda pb          |- lda pb          |  ldy #7          |  lda mask
+  cmp pb          |  cmp pb          |  lda #$7f        |  sta pa
+  bne -           |  bne -           |  sta mask        |- lda pb
+  eor #$ff        |  eor #$ff        |  nextCol = *     |  cmp pb
+  sta scanTable,x |  sta scanTable,x |  lda mask        |  bne -
+  sec             |  sec             |  sta pb          |  eor #$ff
+  rol pa          |  ror pa          |- lda pa          |  sta scanTable,x
+  inx             |  dex             |  cmp pa          |  sec
+  cpx #8          |  bpl nextRow     |  bne -           |  rol mask
+  bcc nextRow     |  cli             |  ldx #$ff        |  inx
+  cli             |  rts             |  stx pb          |  cpx #8
+  rts             |                  |  eor #$ff        |  bcc nextRow
+------------------+------------------+  ldx #7          |  cli
+                                     |- asl             |  rts
+The forward "quick" scanning stores  |  rol scanTable,x +------------------+
+the scan row selection mask into     |  dex             |
+the row selection register and       |  bpl -           |
+shifts the "0" bit one position      |  sec             |
+"forward" for each row, directly,    |  ror mask        |
+using a "rol $dc00" instruction.     |  dey             |
+This would probably be the obvious   |  bpl nextCol     |
+solution to an optimizing assembler  |  lda #$ff        |
+programmer.  However, for some       |  sta ddra        |
+reason not quite understood by this  |  lda #$00        |
+author, there are "shadowing"        |  sta ddrb        |
+problems with this approach.  If     |  cli             |
+you were to hold down the two keys   |  rts             |
+"H" and "K" at the same time, you    +------------------+
+would notice that these two keys
+are on the same column of two successive rows.  If you hold them both down,
+you will see the two positions become active, but so will the same column of
+all successive rows after the "H" and "K", even though these other keys are
+not actually held down.  You will get an inaccurate reading if bad keys are
+held down simultaneously.  You will notice the use of the term "active" above.
+This is because although the hardware returns a "0" for active, the routine
+converts that into a "1" for easier processing later.  I am not sure if
+everyone will get this same result, but if your keyboard is wired the same as
+mine, you will.
+
+The backward "quick" scanning operates quite similarly to the forward
+scanning, except for the direction of the scan and the direction of the
+"shadow"; the shadow goes upwards.  You might think that ANDing together the
+results of the forward and backward scan together would eliminate the shadow,
+but this will not work since any rows between the rows containing the two keys
+held down will be incorrectly read as being active.
+
+The columnwise right scanning is the most complicated because the rows must be
+converted into columns, to allow the scan matrix to be interpreted as before.
+Also, the Data Direction Registers have to be changed.  You might think that
+combinging row-wise scanning with columnwise scanning would give better
+results, and it probably would, if it weren't for a bizarre hardware problem.
+If you hold down two or more keys on the same scan row, say "W" and "E", some
+of the keys will flicker or disappear, giving an inaccurate reading.
+
+The forward "slow" scanning is the best of the bunch.  Incidentally, it is
+what the Kernal uses (as near as I can figure - their code is extremely
+convoluted).  This technique is the same as the forward "quick scan," except
+that the row selection mask is shifted in a working storage location and poked
+into the CIA register, rather than being shifted in place.  I don't know why
+this makes a difference, but it does.  There is still a problem with this
+technique, but this problem occurs with all techniques.  If you hold down
+three keys that form three "corners" of a rectangle in the scanning matrix,
+then the missing corner will be read as being held down also.  For example, if
+you hold down "C", "N", and "M", then the keyboard hardware will also think
+that you are holding down the "X" key.  This is why this article implements a
+"three-key" rollover rather than an "N-key" rollover.  Many three-key
+combinations will still be interpreted correctly.  Note, however, that shift
+keys such as SHIFT or CONTROL will add one more key to the hardware scanning
+(but will not be counted in the three-key rollover), making inaccurate results
+more likely if you are holding down multiple other keys at the same time.
+
+4. THE C-128 KEYSCANNER
+
+This section gives the source code for the C-128 implementation of the
+three-key rollover.  The forward "slow" key matrix scanning technique is used,
+extended to work with the extra keys of the 128.  It was a bit of a pain
+wedging into the Kernal, since there is not a convenient indirect JMP into
+scanning the keyboard, like there are for decoding and buffering pressed keys.
+A rather lengthy IRQ "preamble" had to be copied from the ROM, up to the
+point where it JSRs to the keyscanning routine.  This code in included in
+the form of a ".byte" table, to spare you the details.
+
+Before scanning the keyboard, we check to see if joystick #1 is pushed and if
+a key is actually pressed.  If not, we abort scanning and JMP to the key
+repeat handling in the ROM.  If a key is held down, we scan the keyboard and
+then examine the result.  First we check for the shift keys (SHIFT, COMMODORE,
+CONTROL, ALT, and CAPS LOCK), put them into location $D3 (shift flags) in bit
+postitions 1, 2, 4, 8, and 16, respectively, and remove them from the scan
+matrix.  The CAPS LOCK key is not on the main key matrix; it is read from the
+processor I/O port.  This is good, because otherwise we could not abort
+scanning if it were the only key held down.
+
+Then we scan the keymatrix for the first three keys that are being held down,
+or as many as are held down if less than three.  We store the scan codes of
+these keys into a 3-element array.  We also retain a copy of the 3-element
+array from the previous scan and we check for different keys being in the two
+arrays.  If the old array contains a key that is not present in the new array,
+then the use has released a key, so we set a flag to inhibit interpretation of
+keys and pretend that no keys are held down.  This is to eliminate undesirable
+effects of having other keys held down repeat if you release the most recently
+pushed key first.  PC keyboards do this.  This inhibiting will be ignored if
+new keys are discovered in the next step.
+
+If there are keys in the new array that are not in the old, then the user has
+just pressed a new key, so that new key goes to the head of the old array and
+we stop comparing the arrays there.  The key in the first position of the old
+array is poked into the Kernal "key held down" location for the Kernal to
+interpret later.  If more than one new key is discovered at the same time,
+then each of the new keys will be picked up on successive keyboard scans and
+will be interpreted as just being pushed.  So, if you press the "A", "N", and
+"D" keys all at the same time, some permutation of all three of these keys
+will appear on the screen.
+
+When we are done interpreting the keys, we check the joystick once more and if
+it is still inactive, we present the most recently pushed down key to the
+Kernal and JMP into the ROM keyboard decoding routine.
+
+Unlike in previous issues, this source code is here in literal form; just
+extract everything between the "-----=-----"s to nab the source for yourself.
+The source is in Buddy assembler format.
+
+-----=-----
+;3-Key Rollover-128 by Craig Bruce 18-Jun-93 for C= Hacking magazine
+
+.org $1500
+.obj "@0:keyscan128"
+
+scanrows = 11
+rollover = 3
+
+pa = $dc00
+pb = $dc01
+pk = $d02f
+
+jmp initialInstall
+
+;ugly IRQ patch code.
+
+irq = *  ;$1503
+   .byte $d8,$20,$0a,$15,$4c,$69,$fa,$38,$ad,$19,$d0,$29,$01,$f0,$07,$8d
+   .byte $19,$d0,$a5,$d8,$c9,$ff,$f0,$6f,$2c,$11,$d0,$30,$04,$29,$40,$d0
+   .byte $31,$38,$a5,$d8,$f0,$2c,$24,$d8,$50,$06,$ad,$34,$0a,$8d,$12,$d0
+   .byte $a5,$01,$29,$fd,$09,$04,$48,$ad,$2d,$0a,$48,$ad,$11,$d0,$29,$7f
+   .byte $09,$20,$a8,$ad,$16,$d0,$24,$d8,$30,$03,$29,$ef,$2c,$09,$10,$aa
+   .byte $d0,$28,$a9,$ff,$8d,$12,$d0,$a5,$01,$09,$02,$29,$fb,$05,$d9,$48
+   .byte $ad,$2c,$0a,$48,$ad,$11,$d0,$29,$5f,$a8,$ad,$16,$d0,$29,$ef,$aa
+   .byte $b0,$08,$a2,$07,$ca,$d0,$fd,$ea,$ea,$aa,$68,$8d,$18,$d0,$68,$85
+   .byte $01,$8c,$11,$d0,$8e,$16,$d0,$b0,$13,$ad,$30,$d0,$29,$01,$f0,$0c
+   .byte $a5,$d8,$29,$40,$f0,$06,$ad,$11,$d0,$10,$01,$38,$58,$90,$07,$20
+   .byte $aa,$15,$20,$e7,$c6,$38,$60
+
+;keyscanning entry point
+
+main = *
+   lda #0               ;check if any keys are held down
+   sta pa
+   sta pk
+-  lda pb
+   cmp pb
+   bne -
+   cmp #$ff
+   beq noKeyPressed     ;if not, then don't scan keyboard, goto Kernal
+
+   jsr checkJoystick    ;if so, make sure joystick not pressed
+   bcc joystickPressed
+   jsr keyscan          ;scan the keyboard and store results
+   jsr checkJoystick    ;make sure joystick not pressed again
+   bcc joystickPressed
+   jsr shiftdecode      ;decode the shift keys
+   jsr keydecode        ;decode the first 3 regular keys held down
+   jsr keyorder         ;see which new keys pressed, old keys released, and
+                        ;  determine which key to present to the Kernal
+   lda $033e            ;set up for and dispatch to Kernal
+   sta $cc
+   lda $033f
+   sta $cd
+   ldx #$ff
+   bit ignoreKeys
+   bmi ++
+   lda prevKeys+0
+   cmp #$ff
+   bne +
+   lda $d3
+   beq ++
+   lda #88
++  sta $d4
+   tay
+   jmp ($033a)
+
+   noKeyPressed = *     ;no keys pressed; select default scan row
+   lda #$7f
+   sta pa
+   lda #$ff
+   sta pk
+
+   joystickPressed = *
+   lda #$ff             ;record that no keys are down in old 3-key array
+   ldx #rollover-1
+-  sta prevKeys,x
+   dex
+   bpl -
+   jsr scanCaps         ;scan the CAPS LOCK key
+   ldx #$ff
+   lda #0
+   sta ignoreKeys
+
++  lda #88              ;present "no key held" to Kernal
+   sta $d4
+   tay
+   jmp $c697
+
+initialInstall = *      ;install wedge: set restore vector, print message
+   jsr install
+   lda #<reinstall
+   ldy #>reinstall
+   sta $0a00
+   sty $0a01
+   ldx #0
+-  lda installMsg,x
+   beq +
+   jsr $ffd2
+   inx
+   bne -
++  rts
+
+   installMsg = *
+   .byte 13
+   .asc "keyscan128 installed"
+   .byte 0
+
+reinstall = *           ;re-install wedge after a RUN/STOP+RESTORE
+   jsr install
+   jmp $4003
+
+install = *             ;guts of installation: set IRQ vector to patch code
+   sei                  ;  and initialize scanning variables
+   lda #<irq
+   ldy #>irq
+   sta $0314
+   sty $0315
+   cli
+   ldx #rollover-1
+   lda #$ff
+-  sta prevKeys,x
+   dex
+   bpl -
+   lda #0
+   sta ignoreKeys
+   rts
+
+mask = $cc
+
+keyscan = *             ;scan the (extended) keyboard using the forward
+   ldx #$ff             ;  row-wise "slow" technique
+   ldy #$ff
+   lda #$fe
+   sta mask+0
+   lda #$ff
+   sta mask+1
+   jmp +
+   nextRow = *
+-  lda pb
+   cmp pb
+   bne -
+   sty pa
+   sty pk
+   eor #$ff
+   sta scanTable,x
+   sec
+   rol mask+0
+   rol mask+1
++  lda mask+0
+   sta pa
+   lda mask+1
+   sta pk
+   inx
+   cpx #scanrows
+   bcc nextRow
+   rts
+
+shiftValue = $d3
+
+shiftRows .byte $01,$06,$07,$07,$0a
+shiftBits .byte $80,$10,$20,$04,$01
+shiftMask .byte $01,$01,$02,$04,$08
+
+shiftdecode = *         ;see which "shift" keys are held down, put them into
+   jsr scanCaps         ;  proper positions in $D3 (shift flags), and remove
+   ldy #4               ;  them from the scan matrix
+-  ldx shiftRows,y
+   lda scanTable,x
+   and shiftBits,y
+   beq +
+   lda shiftMask,y
+   ora shiftValue
+   sta shiftValue
+   lda shiftBits,y
+   eor #$ff
+   and scanTable,x
+   sta scanTable,x
++  dey
+   bpl -
+   rts
+
+scanCaps = *            ;scan the CAPS LOCK key from the processor I/O port
+-  lda $1
+   cmp $1
+   bne -
+   eor #$ff
+   and #$40
+   lsr
+   lsr
+   sta shiftValue
+   rts
+
+newpos = $cc
+keycode = $d4
+xsave = $cd
+
+keydecode = *           ;get the scan codes of the first three keys held down
+   ldx #rollover-1      ;initialize: $ff means no key held
+   lda #$ff
+-  sta newKeys,x
+   dex
+   bpl -
+   ldy #0
+   sty newpos
+   ldx #0
+   stx keycode
+
+   decodeNextRow = *    ;decode a row, incrementing the current scan code
+   lda scanTable,x
+   beq decodeContinue
+                        ;at this point, we know that the row has a key held
+   ldy keycode
+-  lsr
+   bcc ++
+   pha                  ;here we know which key it is, so store its scan code,
+   stx xsave            ;  up to 3 keys
+   ldx newpos
+   cpx #rollover
+   bcs +
+   tya
+   sta newKeys,x
+   inc newpos
++  ldx xsave
+   pla
++  iny
+   cmp #$00
+   bne -
+
+   decodeContinue = *
+   clc
+   lda keycode
+   adc #8
+   sta keycode
+   inx
+   cpx #scanrows
+   bcc decodeNextRow
+   rts
+
+;keyorder: determine what key to present to the Kernal as being logically the
+;only one pressed, based on which keys previously held have been released and
+;which new keys have just been pressed
+
+keyorder = *
+   ;** remove old keys no longer held from old scan code array
+   ldy #0
+   nextRemove = *
+   lda prevKeys,y       ;get current old key
+   cmp #$ff
+   beq ++
+   ldx #rollover-1      ;search for it in the new scan code array
+-  cmp newKeys,x
+   beq +
+   dex
+   bpl -
+   tya                  ;here, old key no longer held; remove it
+   tax
+-  lda prevKeys+1,x
+   sta prevKeys+0,x
+   inx
+   cpx #rollover-1
+   bcc -
+   lda #$ff
+   sta prevKeys+rollover-1
+   sta ignoreKeys
++  iny                  ;check next old key
+   cpy #rollover
+   bcc nextRemove
+
+   ;** insert new keys at front of old scan code array 
++  ldy #0
+   nextInsert = *
+   lda newKeys,y        ;get current new key
+   cmp #$ff
+   beq ++
+   ldx #rollover-1      ;check old scan code array for it
+-  cmp prevKeys,x
+   beq +
+   dex
+   bpl -
+   pha                  ;it's not there, so insert new key at front, exit
+   ldx #rollover-2
+-  lda prevKeys+0,x
+   sta prevKeys+1,x
+   dex
+   bpl -
+   lda #0
+   sta ignoreKeys
+   pla
+   sta prevKeys+0
+   ldy #rollover        ;(trick to exit)
++  iny
+   cpy #rollover
+   bcc nextInsert
++  rts                  ;now, the head of the old scan code array contains
+                        ;  the scan code to present to the Kernal, and other
+                        ;  positions represent keys that are also held down
+                        ;  that have already been processed and therefore can
+                        ;  be ignored until they are released
+
+checkJoystick = *       ;check if joystick is pushed: un-select all keyboard
+   lda #$ff             ;  rows and see if there are any "0"s in the scan
+   sta pa               ;  status register
+   sta pk
+-  lda pb
+   cmp pb
+   bne -
+   cmp #$ff
+   lda #$7f             ;restore to default Kernal row selected (to the one
+   sta pa               ;  containing the STOP key)
+   lda #$ff
+   sta pk
+   rts
+
+;global variables
+
+scanTable  .buf scanrows        ;values of the eleven keyboard scan rows
+newKeys    .buf rollover        ;codes of up to three keys held simultaneously
+ignoreKeys .buf 1               ;flag: if an old key has been released and no
+                                ;  new key has been pressed, stop all key
+                                ;  repeating
+prevKeys   .buf rollover+2      ;keys held on previous scan
+-----=-----
+
+And that's all there is to it.  :-)
+
+5. THE C-64 KEYSCANNER
+
+The boot program for the C-64 keyscanner is as follows:
+
+10 d=peek(186)
+20 if a=1 then 60
+30 a=1
+40 load"keyscan64",d,1
+50 goto 10
+60 sys 49152+5*256  : rem $c500
+
+It is very much like boot programs for other machine language programs that
+don't load at the start of BASIC.  It will load the binary from the last
+device accessed, and activate it.
+
+A listing of the C-64 keyscanning code is not presented here because it is so
+similar to the C-128 listing.  The only things that are different are the
+Kernal patches and the keyboard scanning (because the three extra rows don't
+have to be scanned).  The IRQ had to be substantially copied from the ROM,
+again, to get at the call to the key scanning.  Also, rather than taking
+over the BASIC reset vector (since there isn't one), the NMI vector is
+taken over to insure the survival of the key scanner after a RUN/STOP+RESTORE.
+A bit of its preamble also had to be copied out of ROM to get at the good
+stuff.  If you want a copy of the C-64 listing, you can e-mail me.
+
+6. UUENCODED FILES
+
+Here are the binary executables in uuencoded form.  The CRC32s of the four
+files are as follows:
+
+crc32 = 3398956287 for "keyscan128"
+crc32 = 2301926894 for "keyscan64.boot"
+crc32 = 1767081474 for "keyscan64"
+crc32 = 1604419896 for "keyshow"
+
+begin 640 keyscan128
+M`!5,'A;8(`H53&GZ.*T9T"D!\`>-&="EV,G_\&\L$=`P!"E`T#$XI=CP+"38
+M4`:M-`J-$M"E`2G]"01(K2T*2*T1T"E_"2"HK1;0)-@P`RGO+`D0JM`HJ?^-
+M$M"E`0D"*?L%V4BM+`I(K1'0*5^HK1;0*>^JL`BB!\K0_>KJJFB-&-!HA0&,
+M$=".%M"P$ZTPT"D!\`REV"E`\`:M$=`0`3A8D`<@JA4@Y\8X8*D`C0#<C2_0
+MK0'<S0'<T/C)__`Z((D7D#\@<18@B1>0-R"W%B#L%B`L%ZT^`X7,K3\#A<VB
+M_RRT%S`QK;47R?_0!J73\":I6(74J&PZ`ZE_C0#<J?^-+]"I_Z("G;47RA#Z
+M(-T6HO^I`(VT%ZE8A=2H3)?&(%46J4^@%HT`"HP!"J(`O3D6\`8@TO_HT/5@
+M#4M%65-#04XQ,C@@24Y35$%,3$5$`"!5%DP#0'BI`Z`5C10#C!4#6*("J?^=
+MM1?*$/JI`(VT%V"B_Z#_J?Z%S*G_A<U,F!:M`=S-`=S0^(P`W(POT$G_G:87
+M.";,)LVES(T`W*7-C2_0Z.`+D-E@`08'!PJ`$"`$`0$!`@0((-T6H`2^J!:]
+MIA<YK1;P$KFR%@73A=.YK19)_SVF%YVF%X@0X&"E`<4!T/I)_RE`2DJ%TV"B
+M`JG_G;$7RA#ZH`"$S*(`AM2]IA?P'*342I`22(;-ILS@`[`&F)VQ%^;,ILUH
+MR,D`T.88I=1I"(74Z.`+D--@H`"YM1?)__`DH@+=L1?P&,H0^)BJO;87G;47
+MZ.`"D/6I_XVW%XVT%\C``Y#5H`"YL1?)__`FH@+=M1?P&LH0^$BB`;VU%YVV
+M%\H0]ZD`C;07:(VU%Z`#R,`#D--@J?^-`-R-+]"M`=S-`=S0^,G_J7^-`-RI
+9_XTOT&``````````````````````````````
+`
+end
+begin 640 keyscan64.boot
+M`0@."`H`1++"*#$X-BD`'0@4`(L@0;(Q(*<@-C``)0@>`$&R,0`Z""@`DR)+
+M15E30T%.-C0B+$0L,0!#"#(`B2`Q,`!@"#P`GB`T.3$U,JHUK#(U-B`@.B"/
+)("1#-3`P````````
+`
+end
+begin 640 keyscan64
+M`,5,Q,5,$,9,ZL4@ZO^ES-`IQLW0):D4A<VDTT;/KH<"L=&P$>;/A<X@).JQ
+M\XV'`JZ&`J7.28`@'.JE`2D0\`J@`(3`I0$)(-`(I<#0!J4!*1^%`2!9Q4Q^
+MZJD`C0#<K0'<S0'<T/C)__`Y(%C'D#D@6,8@6,>0,2"-QB"[QB#[QJF!A?6I
+MZX7VHO\L>,<P+:UYQ\G_T`>MC0+P(:E`A<NH;(\"J7^-`-RI_Z("G7G'RA#Z
+M(+7&HO^I`(UXQZE`A<NH3";K(.K%H@"]U<7P!B#2_^C0]6!+15E30T%.-C0@
+M24Y35$%,3$5$#0!XJ0F@Q8T4`XP5`ZDGH,:-&`.,&0-8H@*I_YUYQ\H0^JD`
+MC7C'8'BI,:#JC10#C!4#J4>@_HT8`XP9`UA@2(I(F$BI?XT-W:P-W3`?(`+]
+MT`-L`H`@O/8@X?_0#R`5_2"C_2`8Y2#JQ6P"H$QR_J+_H/^I_H7U3';&K0'<
+MS0'<T/B,`-Q)_YUMQS@F]:7UC0#<Z.`(D.-@`08'!X`0(`0!`0($(+7&H`.^
+M@<:];<<YA<;P%+F)Q@V-`HV-`KF%QDG_/6W'G6W'B!#>8*D`C8T"8*("J?^=
+M=<?*$/J@`(3UH@"&R[UMQ_`<I,M*D!)(AO:F]>`#L`:8G77'YO6F]FC(R0#0
+MYABERVD(A<OHX`B0TV"@`+EYQ\G_\"2B`MUUQ_`8RA#XF*J]>L>=><?HX`*0
+M]:G_C7O'C7C'R,`#D-6@`+EUQ\G_\":B`MUYQ_`:RA#X2*(!O7G'G7K'RA#W
+MJ0"->,=HC7G'H`/(P`.0TV"I_XT`W*T!W,T!W-#XR?^I?XT`W&``````````
+*````````````````
+`
+end
+begin 640 keyshow
+M`!-,"Q,``````````*F3(-+_(#83H@`@%Q0@5A.B"B`7%"!T$Z(4(!<4(/03
+MHAX@%Q0@3!1,$!-XH@"I_HT`W*T!W,T!W-#X2?^=`Q,X+@#<Z.`(D.I88'BB
+M!ZE_C0#<K0'<S0'<T/A)_YT#$SAN`-S*$.Q88'BI`(T"W*G_C0/<H`>I?X4#
+MI0.-`=RM`-S-`-S0^*+_C@'<2?^B!PH^`Q/*$/DX9@.($-VI_XT"W*D`C0/<
+M6&!XJ0"-`MRI_XT#W*`'J7^%`Z4#C0'<K0#<S0#<T/BB_XX!W$G_H@<*/@,3
+MRA#Y.&8#B!#=J?^-`MRI`(T#W%A@>*(`J?Z%`Z4#C0#<K0'<S0'<T/A)_YT#
+M$S@F`^C@")#F6&"@!(8$A`6B`+T#$R`V%!BE!&DHA020`N8%Z.`(D.I@A0*@
+6!T8"J0!I,)$$B!#U8````````*(`8```
+`
+end
+================================================================================

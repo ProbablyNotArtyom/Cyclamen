@@ -9,11 +9,14 @@ OBJ = co65
 
 CCFLAGS = -t c64 --cpu $(CPU) -O --standard c99
 ASFLAGS = -t c64 --cpu $(CPU) -U
-LDFLAGS = --mapfile $(BINDIR)/cyclamen.map -C $(BASEDIR)/src/platform/$(ARCH)/$(PLATFORM)/link.ld c64.lib
+LDFLAGS = -Ln $(BINDIR)/cyclamen.vs --mapfile $(BINDIR)/cyclamen.map --dbgfile $(BINDIR)/cyclamen.dbg -C $(BASEDIR)/src/platform/$(ARCH)/$(PLATFORM)/link.ld c64.lib
 
-.PHONY: all-phony run
+.PHONY: all-phony run debug
 all-phony:
 	$(MAKE) all
 
 run:
-	x64 -kernal $(BINARY_NAME)
+	x64sc -kernal $(BINARY_NAME)
+
+debug:
+	c64debugger -kernal $(BINARY_NAME) -moncommands "$(TOOLDIR)/vice-startup"

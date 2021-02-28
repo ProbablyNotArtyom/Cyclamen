@@ -1,7 +1,7 @@
 //---------------------------------------------------
 // Cyclamen - NotArtyom - 2020
 //---------------------------------------------------
-    
+
 	#include <hwdeps.h>
 	#include <stdbool.h>
 	#include <stdint.h>
@@ -56,6 +56,19 @@ char dev_plat_c64_peek(void) {
 #define IFR   	0xDC0D
 #define IER   	0xDC0E
 #define ORAX  	0xDC0F
+
+//  WRITE TO |                    READ PORT B ($DC01)
+//  PORT A   |
+//  ($DC00)  |  Bit 7   Bit 6   Bit 5   Bit 4   Bit 3   Bit 2   Bit 1   Bit 0
+// ----------|---------------------------------------------------------------
+//   Bit 7   |  STOP    Q       C=      SPACE   2       CTRL    <-      1
+//   Bit 6   |  /       ^       =       RSHIFT  HOME    ;       *       LIRA
+//   Bit 5   |  ,       @       :       .       -       L       P       +
+//   Bit 4   |  N       O       K       M       0       J       I       9
+//   Bit 3   |  V       U       H       B       8       G       Y       7
+//   Bit 2   |  X       T       F       C       6       D       R       5
+//   Bit 1   |  LSHIFT  E       S       Z       4       A       W       3
+//   Bit 0   |  DOWN    F5      F3      F1      F7      RIGHT   RETURN  DELETE
 
 const uint8_t B0[8] = { 0x08, 0x33, 0x35, 0x37, 0x39, 0x2B, 0x1C, 0x31 };
 const uint8_t B1[8] = { 0x0a, 0x57, 0x52, 0x59, 0x49, 0x50, 0x2A, 0x08 };
@@ -218,42 +231,42 @@ KBLTB8:
 	__asm__("cpx #$00");
 	__asm__("bne %g", K0);
 	__asm__("tax");
-	__asm__("lda %v,x", SB0);
+	__asm__("lda %v,x", B0);
 	__asm__("jmp %g", KDN);
 K0:	__asm__("cpx #$01");
 	__asm__("bne %g", K1);
 	__asm__("tax");
-	__asm__("lda %v,x", SB1);
+	__asm__("lda %v,x", B1);
 	__asm__("jmp %g", KDN);
 K1:	__asm__("cpx #$02");
 	__asm__("bne %g", K2);
 	__asm__("tax");
-	__asm__("lda %v,x", SB2);
+	__asm__("lda %v,x", B2);
 	__asm__("jmp %g", KDN);
 K2:	__asm__("cpx #$03");
 	__asm__("bne %g", K3);
 	__asm__("tax");
-	__asm__("lda %v,x", SB3);
+	__asm__("lda %v,x", B3);
 	__asm__("jmp %g", KDN);
 K3:	__asm__("cpx #$04");
 	__asm__("bne %g", K4);
 	__asm__("tax");
-	__asm__("lda %v,x", SB4);
+	__asm__("lda %v,x", B4);
 	__asm__("jmp %g", KDN);
 K4:	__asm__("cpx #$05");
 	__asm__("bne %g", K5);
 	__asm__("tax");
-	__asm__("lda %v,x", SB5);
+	__asm__("lda %v,x", B5);
 	__asm__("jmp %g", KDN);
 K5:	__asm__("cpx #$06");
 	__asm__("bne %g", K6);
 	__asm__("tax");
-	__asm__("lda %v,x", SB6);
+	__asm__("lda %v,x", B6);
 	__asm__("jmp %g", KDN);
 K6:	__asm__("cpx #$07");
 	__asm__("bne %g", K7);
 	__asm__("tax");
-	__asm__("lda %v,x", SB7);
+	__asm__("lda %v,x", B7);
 	__asm__("jmp %g", KDN);
 K7:	__asm__("lda #$FF");
 	__asm__("tax");
@@ -312,42 +325,42 @@ SKBLTB8:
 	__asm__("cpx #$00");
 	__asm__("bne %g", S0);
 	__asm__("tax");
-	__asm__("lda %v,x", SB0);
+	__asm__("lda %v,x", B0);
 	__asm__("jmp %g", KDN);
 S0:	__asm__("cpx #$01");
 	__asm__("bne %g", S1);
 	__asm__("tax");
-	__asm__("lda %v,x", SB1);
+	__asm__("lda %v,x", B1);
 	__asm__("jmp %g", KDN);
 S1:	__asm__("cpx #$02");
 	__asm__("bne %g", S2);
 	__asm__("tax");
-	__asm__("lda %v,x", SB2);
+	__asm__("lda %v,x", B2);
 	__asm__("jmp %g", KDN);
 S2:	__asm__("cpx #$03");
 	__asm__("bne %g", S3);
 	__asm__("tax");
-	__asm__("lda %v,x", SB3);
+	__asm__("lda %v,x", B3);
 	__asm__("jmp %g", KDN);
 S3:	__asm__("cpx #$04");
 	__asm__("bne %g", S4);
 	__asm__("tax");
-	__asm__("lda %v,x", SB4);
+	__asm__("lda %v,x", B4);
 	__asm__("jmp %g", KDN);
 S4:	__asm__("cpx #$05");
 	__asm__("bne %g", S5);
 	__asm__("tax");
-	__asm__("lda %v,x", SB5);
+	__asm__("lda %v,x", B5);
 	__asm__("jmp %g", KDN);
 S5:	__asm__("cpx #$06");
 	__asm__("bne %g", S6);
 	__asm__("tax");
-	__asm__("lda %v,x", SB6);
+	__asm__("lda %v,x", B6);
 	__asm__("jmp %g", KDN);
 S6:	__asm__("cpx #$07");
 	__asm__("bne %g", S7);
 	__asm__("tax");
-	__asm__("lda %v,x", SB7);
+	__asm__("lda %v,x", B7);
 	__asm__("jmp %g", KDN);
 S7:	__asm__("lda #$FF");
 

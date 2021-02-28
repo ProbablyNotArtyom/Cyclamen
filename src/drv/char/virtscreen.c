@@ -38,10 +38,10 @@ int dev_virtscreen_putc(char chr) {
 	if (xpos >= SCREEN_WIDTH || chr == '\n' || chr == '\r') {
 		xpos = 0;
 		++ypos;
-	}
-	if (ypos >= SCREEN_HEIGHT) {
-		--ypos;
-		scroll_screen();
+		if (ypos >= SCREEN_HEIGHT) {
+			--ypos;
+			scroll_screen();
+		}
 	}
 
 	if (chr != '\n' && chr != '\r') {

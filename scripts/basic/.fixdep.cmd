@@ -24,7 +24,7 @@ deps_scripts/basic/fixdep := \
   /usr/include/bits/types/clockid_t.h \
   /usr/include/bits/types/time_t.h \
   /usr/include/bits/types/timer_t.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stddef.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stddef.h \
   /usr/include/bits/stdint-intn.h \
   /usr/include/endian.h \
   /usr/include/bits/endian.h \
@@ -44,6 +44,7 @@ deps_scripts/basic/fixdep := \
   /usr/include/bits/struct_rwlock.h \
   /usr/include/sys/stat.h \
   /usr/include/bits/stat.h \
+  /usr/include/bits/struct_stat.h \
   /usr/include/sys/mman.h \
   /usr/include/bits/mman.h \
   /usr/include/bits/mman-map-flags-generic.h \
@@ -73,7 +74,7 @@ deps_scripts/basic/fixdep := \
   /usr/include/bits/stdlib-bsearch.h \
   /usr/include/bits/stdlib-float.h \
   /usr/include/stdio.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdarg.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdarg.h \
   /usr/include/bits/types/__fpos_t.h \
   /usr/include/bits/types/__mbstate_t.h \
   /usr/include/bits/types/__fpos64_t.h \
@@ -81,10 +82,9 @@ deps_scripts/basic/fixdep := \
   /usr/include/bits/types/FILE.h \
   /usr/include/bits/types/struct_FILE.h \
   /usr/include/bits/stdio_lim.h \
-  /usr/include/bits/sys_errlist.h \
   /usr/include/bits/stdio.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed/limits.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed/syslimits.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include-fixed/limits.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include-fixed/syslimits.h \
   /usr/include/limits.h \
   /usr/include/bits/posix1_lim.h \
   /usr/include/bits/local_lim.h \

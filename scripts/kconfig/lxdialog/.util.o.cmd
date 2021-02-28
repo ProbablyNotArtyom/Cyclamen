@@ -5,7 +5,7 @@ source_scripts/kconfig/lxdialog/util.o := scripts/kconfig/lxdialog/util.c
 deps_scripts/kconfig/lxdialog/util.o := \
     $(wildcard include/config/color.h) \
   /usr/include/stdc-predef.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdarg.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdarg.h \
   scripts/kconfig/lxdialog/dialog.h \
   /usr/include/sys/types.h \
   /usr/include/features.h \
@@ -22,7 +22,7 @@ deps_scripts/kconfig/lxdialog/util.o := \
   /usr/include/bits/types/clockid_t.h \
   /usr/include/bits/types/time_t.h \
   /usr/include/bits/types/timer_t.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stddef.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stddef.h \
   /usr/include/bits/stdint-intn.h \
   /usr/include/endian.h \
   /usr/include/bits/endian.h \
@@ -44,6 +44,7 @@ deps_scripts/kconfig/lxdialog/util.o := \
   /usr/include/bits/fcntl.h \
   /usr/include/bits/fcntl-linux.h \
   /usr/include/bits/stat.h \
+  /usr/include/bits/struct_stat.h \
   /usr/include/unistd.h \
   /usr/include/bits/posix_opt.h \
   /usr/include/bits/environments.h \
@@ -65,13 +66,13 @@ deps_scripts/kconfig/lxdialog/util.o := \
   /usr/include/bits/stdlib-float.h \
   /usr/include/string.h \
   /usr/include/strings.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdbool.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdbool.h \
   /usr/include/libintl.h \
   /usr/include/locale.h \
   /usr/include/bits/locale.h \
   /usr/include/curses.h \
   /usr/include/ncurses_dll.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdint.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdint.h \
   /usr/include/stdint.h \
   /usr/include/bits/wchar.h \
   /usr/include/bits/stdint-uintn.h \
@@ -83,7 +84,6 @@ deps_scripts/kconfig/lxdialog/util.o := \
   /usr/include/bits/types/FILE.h \
   /usr/include/bits/types/struct_FILE.h \
   /usr/include/bits/stdio_lim.h \
-  /usr/include/bits/sys_errlist.h \
   /usr/include/bits/stdio.h \
   /usr/include/unctrl.h \
   /usr/include/curses.h \

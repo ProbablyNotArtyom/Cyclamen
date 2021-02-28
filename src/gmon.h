@@ -12,12 +12,8 @@
 
 //---------------------------------------------------
 
-	#define GMON_VERSION	"1.2"
+	#define GMON_VERSION	"1.3"
 	#define	BUFFLEN			0xFF
-
-	#ifndef KEY_BREAK
-	#define KEY_BREAK		' '
-	#endif
 
 	#define	ADDRSIZE		uint16_t
 	#define NUM_FUNCS		11
@@ -37,12 +33,15 @@
 #define enforceArgc(...) 		VA_MACRO(enforceArgc, __VA_ARGS__)
 #define enforceArgc0()			if (!noArgs()) return errEXTRA_ARGS
 
-
-#define isBreak()			(peek() == KEY_BREAK)
 #define noArgs()			(*skipBlank() == '\0')
 #define queryBreak()		if isBreak() return errBREAK;
 #define testArg(err)		if noArgs() return err
 
+#ifndef KEY_BREAK
+	#define isBreak()		(0)
+#else
+	#define isBreak()		(peek() == KEY_BREAK)
+#endif
 
 typedef uint8_t err_t;
 static enum errList {

@@ -6,9 +6,12 @@
 	#include <stdbool.h>
 	#include <std.h>
 
+	#include "gmon.h"
+
 //---------------------------------------------------
 
 extern int gmon(void);
+char mon_exit_status;
 
 //---------------------------------------------------
 
@@ -17,9 +20,12 @@ int main(void) {
 	tty_init();
 	puts("\n### cyclamen " CYCLAMEN_VERSION " ###\n");
 	puts("### notartyom, rev (" CYCLAMEN_DATE ") ###\n\n");
-    while (true) {
-		puts("starting g'mon...\n");
-		gmon();
-	}
+
+	puts("starting g'mon...\n");
+	mon_exit_status = gmon();
+	puts("\n### exited with value: ");
+	printByte(mon_exit_status);
+	puts(" ###\n");
+	while (true) {}
 	return 0;
 }

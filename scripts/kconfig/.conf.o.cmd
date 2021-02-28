@@ -14,7 +14,7 @@ deps_scripts/kconfig/conf.o := \
   /usr/include/bits/long-double.h \
   /usr/include/gnu/stubs.h \
   /usr/include/gnu/stubs-64.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stddef.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stddef.h \
   /usr/include/bits/locale.h \
   /usr/include/bits/types/locale_t.h \
   /usr/include/bits/types/__locale_t.h \
@@ -27,7 +27,7 @@ deps_scripts/kconfig/conf.o := \
   /usr/include/bits/endianness.h \
   /usr/include/stdio.h \
   /usr/include/bits/libc-header-start.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdarg.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdarg.h \
   /usr/include/bits/types/__fpos_t.h \
   /usr/include/bits/types/__mbstate_t.h \
   /usr/include/bits/types/__fpos64_t.h \
@@ -35,13 +35,12 @@ deps_scripts/kconfig/conf.o := \
   /usr/include/bits/types/FILE.h \
   /usr/include/bits/types/struct_FILE.h \
   /usr/include/bits/stdio_lim.h \
-  /usr/include/bits/sys_errlist.h \
+  /usr/include/bits/floatn.h \
+  /usr/include/bits/floatn-common.h \
   /usr/include/bits/stdio.h \
   /usr/include/stdlib.h \
   /usr/include/bits/waitflags.h \
   /usr/include/bits/waitstatus.h \
-  /usr/include/bits/floatn.h \
-  /usr/include/bits/floatn-common.h \
   /usr/include/sys/types.h \
   /usr/include/bits/types/clock_t.h \
   /usr/include/bits/types/clockid_t.h \
@@ -82,11 +81,12 @@ deps_scripts/kconfig/conf.o := \
   /usr/include/bits/getopt_ext.h \
   /usr/include/sys/stat.h \
   /usr/include/bits/stat.h \
+  /usr/include/bits/struct_stat.h \
   /usr/include/sys/time.h \
   scripts/kconfig/lkc.h \
     $(wildcard include/config/list.h) \
   scripts/kconfig/expr.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdbool.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdbool.h \
   /usr/include/libintl.h \
   scripts/kconfig/lkc_proto.h \
 

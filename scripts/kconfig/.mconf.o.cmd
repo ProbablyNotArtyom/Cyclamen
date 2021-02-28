@@ -33,17 +33,18 @@ deps_scripts/kconfig/mconf.o := \
   /usr/include/bits/fcntl-linux.h \
   /usr/include/bits/types/struct_timespec.h \
   /usr/include/bits/stat.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed/limits.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include-fixed/syslimits.h \
+  /usr/include/bits/struct_stat.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include-fixed/limits.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include-fixed/syslimits.h \
   /usr/include/limits.h \
   /usr/include/bits/libc-header-start.h \
   /usr/include/bits/posix1_lim.h \
   /usr/include/bits/local_lim.h \
   /usr/include/linux/limits.h \
   /usr/include/bits/posix2_lim.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdarg.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdarg.h \
   /usr/include/stdlib.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stddef.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stddef.h \
   /usr/include/bits/waitflags.h \
   /usr/include/bits/waitstatus.h \
   /usr/include/bits/floatn.h \
@@ -92,15 +93,14 @@ deps_scripts/kconfig/mconf.o := \
   /usr/include/bits/types/FILE.h \
   /usr/include/bits/types/struct_FILE.h \
   /usr/include/bits/stdio_lim.h \
-  /usr/include/bits/sys_errlist.h \
   /usr/include/bits/stdio.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdbool.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdbool.h \
   /usr/include/libintl.h \
   scripts/kconfig/lkc_proto.h \
   scripts/kconfig/lxdialog/dialog.h \
   /usr/include/curses.h \
   /usr/include/ncurses_dll.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/9.3.0/include/stdint.h \
+  /usr/lib/gcc/x86_64-pc-linux-gnu/10.2.0/include/stdint.h \
   /usr/include/stdint.h \
   /usr/include/bits/wchar.h \
   /usr/include/bits/stdint-uintn.h \

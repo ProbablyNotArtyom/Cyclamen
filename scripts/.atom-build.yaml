@@ -1,0 +1,13 @@
+cmd: "{FILE_ACTIVE}"
+name: "newConfig-default"
+cwd: "{FILE_ACTIVE_PATH}"
+args:
+  - "{FILE_ACTIVE_PATH}/../nConfig.xml"
+sh: true
+targets:
+  newConfig-debug:
+      cmd: "{FILE_ACTIVE}"
+      cwd: "{FILE_ACTIVE_PATH}"
+      args:
+        - "{FILE_ACTIVE_PATH}/../nConfig.xml"
+        - dummy

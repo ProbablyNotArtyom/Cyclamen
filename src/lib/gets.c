@@ -10,7 +10,7 @@
 
 //---------------------------------------------------
 
-char i, key;
+static char i, key;
 char *gets(char *buff, int len) {
     i = 0;
 	while (i < len) {
