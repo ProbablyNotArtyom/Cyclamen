@@ -44,16 +44,16 @@
 #endif
 
 typedef uint8_t err_t;
-static enum errList {
-		errNONE,
-		errSYNTAX,
-		errUNDEF,
-		errEXTRA_ARGS,
-		errNEEDS_ARGS,
-		errBAD_HEX,
-		errBAD_RANGE,
-		errBREAK,
-		errDO_EXIT
+enum errList {
+	errNONE,
+	errSYNTAX,
+	errUNDEF,
+	errEXTRA_ARGS,
+	errNEEDS_ARGS,
+	errBAD_HEX,
+	errBAD_RANGE,
+	errBREAK,
+	errDO_EXIT
 };
 
 extern const char const funcKeys[];

@@ -108,6 +108,10 @@ clean:
 	rm -rf $(BINDIR)/*
 	rm -f $(BINARY_NAME)
 
+.PHONY: distclean
+distclean: clean
+	rm $(PWD)/.config
+
 #=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 # !!!!!!!!!!!!!! Kbuild experimental support !!!!!!!!!!!!!!
