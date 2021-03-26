@@ -9,7 +9,7 @@ OBJ = ia16-elf-objdump
 
 CCFLAGS = -ffreestanding -fno-inline -mcmodel=small -msegment-relocation-stuff -mtune=$(CPU) -Os -S
 ASFLAGS = -mtune=$(CPU)
-LDSCRIPT = raw.ld
+LDSCRIPT = tiny.ld
 LDFLAGS = -T $(BASEDIR)/src/platform/$(ARCH)/$(PLATFORM)/$(LDSCRIPT)
 
 .PHONY: all-phony run debug

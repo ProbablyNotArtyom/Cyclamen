@@ -4,15 +4,12 @@
 
 	#include <hwdeps.h>
 	#include <std.h>
-	#include <stdbool.h>
-	#include <hwdeps.h>
-	#include <io.h>
 
 //---------------------------------------------------
 
-static char i, key;
 char *gets(char *buff, int len) {
-    i = 0;
+	char i = 0;
+	char key;
 	while (i < len) {
         key = getc();
 		if (key == 0x7F && i > 0) {

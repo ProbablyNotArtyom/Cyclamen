@@ -9,9 +9,8 @@
 
 //---------------------------------------------------
 
-int iter;
 int puts(const char *str) {
-	iter = 0;
+	int iter = 0;
 	while (str[iter] != '\0') putc(str[iter++]);
 	return 0;
 }
