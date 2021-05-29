@@ -12,6 +12,7 @@
 
 extern int gmon(void);
 char mon_exit_status;
+char testInput[20];
 
 //---------------------------------------------------
 

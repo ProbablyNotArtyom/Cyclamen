@@ -19,7 +19,7 @@ char *gets(char *buff, int len) {
 		} else {
 			buff[i] = key;
 			putc(key);
-			if (key == '\r') break;
+			if (key == '\n') break;
             i++;
         }
 	}

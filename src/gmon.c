@@ -108,28 +108,20 @@ int gmon(void) {
 	while (!doExit) {
 		print_prompt();
 		parse = inBuffer;							// Set the parse pointer to the beginning of the buffer
-		{  /* Simulate gets() */
-			inBuffer[0] = 'h';
-			inBuffer[1] = ';';
-			inBuffer[2] = 'q';
-			inBuffer[3] = '\0';
-			while (*parse != '\0') putc(*parse++);
-			parse = inBuffer;
-		}
-		//gets(inBuffer, BUFFLEN);					// Get user input
+		gets(inBuffer, BUFFLEN);					// Get user input
 		skipBlank();								// Skip and leading spaces
 		putc('\r');
 		if (!noArgs()) {
 			numLoops = 1;
 			numCMDs = 0x01;
 			skipBlank();
-			//if (*parse == '/') {
-			//	cmdStart = parse++;
-			//	while (*cmdStart != '/') cmdStart++;
-			//	*cmdStart = ' ';
-			//	numLoops = (uint16_t)strToHEX();
-			//	parse++;
-			//}
+			if (*parse == '/') {
+				cmdStart = parse++;
+				while (*cmdStart != '/') cmdStart++;
+				*cmdStart = ' ';
+				numLoops = (uint16_t)strToHEX();
+				parse++;
+			}
 			cmdStart = parse;
 			for (tmp = parse; *tmp != '\0'; tmp++) if (*tmp == ';') numCMDs += 1;
 			while (numLoops > 0) {
